@@ -10,6 +10,7 @@
 
             structured knowledge · versioned pages · agent-ready · human-owned
 ```
+
 Wikiplane turns source material into a durable, cross-referenced Markdown knowledge base stored in Git.
 
 It is designed for two related uses:
@@ -21,7 +22,7 @@ A caller gives Wikiplane a source reference. Wikiplane acquires and converts the
 
 The source body stays in Wikiplane's data plane. Supervising agents and MCP clients use high-level operations and receive compact results instead of shuttling whole PDFs or converted documents through conversational context.
 
-> **Project status:** active development. The core architecture and deterministic lifecycle are implemented. Live model-quality, OCR-quality, and web-adapter evaluations remain evidence-driven work before a stable public release.
+> **Project status:** active development. The core architecture and deterministic lifecycle are implemented. Live model-quality and web-adapter evaluations remain evidence-driven work before a stable public release.
 
 ## Why Wikiplane?
 
@@ -49,7 +50,7 @@ source reference
 controlled acquisition
       │
       ▼
-document/web adapter ──► OCR when needed
+document/web adapter
       │
       ▼
 raw Markdown + provenance
@@ -89,7 +90,7 @@ packages/cli/            command-line interface
 packages/mcp/            high-level MCP server
 packages/testing/        fakes and adapter contract helpers
 services/model-gateway/  OpenAI-compatible model boundary
-services/markitdown/     MarkItDown + OCR conversion service
+services/markitdown/     isolated MarkItDown conversion service
 config/                  prompts, schema templates, runtime examples
 evals/                   semantic/model evaluation scaffolding
 docs/                    architecture and operational documentation
@@ -228,7 +229,7 @@ corepack pnpm wikiplane -- --config wikiplane.yaml query \
 
 ## Remote document ingestion
 
-PDF and other document conversion is provided through the MarkItDown service. OCR uses an OpenAI-compatible model endpoint through Wikiplane's model gateway.
+PDF and other supported document conversion is provided through the isolated MarkItDown service. Image-only/scanned documents are not supported in the current release.
 
 For the Docker-first stack:
 
@@ -309,10 +310,12 @@ Start here:
 - [Adapters](docs/adapters.md)
 - [Models](docs/models.md)
 - [Testing](docs/testing.md)
+- [Backlog](docs/BACKLOG.md)
+- [Release checklist](docs/release-checklist.md)
 - [Security model](docs/security-model.md)
 - [Upstream LLM Wiki import](docs/upstream-llmwiki-import.md)
 
-The original implementation specification is retained under `docs/` for design history; ADRs capture the decisions that the implemented project now treats as durable architecture.
+The current requirements/status summaries are retained under `docs/`; ADRs capture the decisions that the implemented project treats as durable architecture, while deferred ideas live in `docs/BACKLOG.md`.
 
 ## Contributing
 

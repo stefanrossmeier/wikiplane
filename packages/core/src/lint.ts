@@ -1,12 +1,23 @@
-import { access, constants } from 'node:fs/promises';
-import { join, resolve, relative, dirname, basename } from 'node:path';
-import { listPages, readPage, writePage, getPageLinks, type WikiPageFrontmatter } from './wiki.js';
-import { readIndex, removeEntry, addEntry, type IndexEntry } from './index-ops.js';
-import { API_VERSION } from './constants.js';
-import { isNotFoundError } from './errors.js';
+import { access, constants } from "node:fs/promises";
+import { join, resolve, relative, dirname, basename } from "node:path";
+import {
+  listPages,
+  readPage,
+  writePage,
+  getPageLinks,
+  type WikiPageFrontmatter,
+} from "./wiki.js";
+import {
+  readIndex,
+  removeEntry,
+  addEntry,
+  type IndexEntry,
+} from "./index-ops.js";
+import { API_VERSION } from "./constants.js";
+import { isNotFoundError } from "./errors.js";
 
 export interface LintFinding {
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
   category: string;
   message: string;
   file?: string;
@@ -36,7 +47,7 @@ async function fileExists(filePath: string): Promise<boolean> {
  * Normalize a path to use forward slashes for consistent comparison.
  */
 function normalizePath(p: string): string {
-  return p.replace(/\\/g, '/');
+  return p.replace(/\\/g, "/");
 }
 
 /**
@@ -48,8 +59,8 @@ export async function lintWiki(
   categories?: string[],
 ): Promise<LintResult> {
   const root = resolve(targetPath);
-  const wikiDir = join(root, 'wiki');
-  const indexPath = join(wikiDir, 'index.md');
+  const wikiDir = join(root, "wiki");
+  const indexPath = join(wikiDir, "index.md");
 
   const findings: LintFinding[] = [];
 
@@ -60,7 +71,7 @@ export async function lintWiki(
   const allPages = await listPages(wikiDir);
   const wikiPages = allPages.filter((p) => {
     const rel = normalizePath(relative(wikiDir, p));
-    return rel !== 'index.md' && rel !== 'log.md';
+    return rel !== "index.md" && rel !== "log.md";
   });
 
   // Build a set of existing wiki page relative paths
@@ -99,18 +110,20 @@ export async function lintWiki(
   const indexedPaths = new Set(indexEntries.map((e) => normalizePath(e.path)));
 
   // ── broken-links: Links pointing to non-existent files ──
-  if (shouldRun('broken-links')) {
+  if (shouldRun("broken-links")) {
     for (const [pagePath, links] of pageLinks) {
       const pageRel = normalizePath(relative(wikiDir, pagePath));
       for (const linkRel of links) {
         const resolvedLink = resolve(wikiDir, linkRel);
         const normalizedRoot = normalizePath(root);
         const normalizedResolved = normalizePath(resolvedLink);
-        const withinBrain = normalizedResolved === normalizedRoot || normalizedResolved.startsWith(normalizedRoot + '/');
+        const withinBrain =
+          normalizedResolved === normalizedRoot ||
+          normalizedResolved.startsWith(normalizedRoot + "/");
         if (!withinBrain || !(await fileExists(resolvedLink))) {
           findings.push({
-            severity: 'error',
-            category: 'broken-links',
+            severity: "error",
+            category: "broken-links",
             message: `Broken link to "${linkRel}" in page "${pageRel}"`,
             file: pageRel,
           });
@@ -120,12 +133,12 @@ export async function lintWiki(
   }
 
   // ── orphan-pages: No inbound links AND not in index ──
-  if (shouldRun('orphan-pages')) {
+  if (shouldRun("orphan-pages")) {
     for (const pageRel of existingPagePaths) {
       if (!inboundLinks.has(pageRel) && !indexedPaths.has(pageRel)) {
         findings.push({
-          severity: 'warning',
-          category: 'orphan-pages',
+          severity: "warning",
+          category: "orphan-pages",
           message: `Orphan page "${pageRel}" — not linked and not indexed`,
           file: pageRel,
         });
@@ -134,12 +147,12 @@ export async function lintWiki(
   }
 
   // ── index-completeness: Every wiki page should be in index ──
-  if (shouldRun('index-completeness')) {
+  if (shouldRun("index-completeness")) {
     for (const pageRel of existingPagePaths) {
       if (!indexedPaths.has(pageRel)) {
         findings.push({
-          severity: 'warning',
-          category: 'index-completeness',
+          severity: "warning",
+          category: "index-completeness",
           message: `Page "${pageRel}" is not listed in index.md`,
           file: pageRel,
         });
@@ -148,14 +161,14 @@ export async function lintWiki(
   }
 
   // ── stale-entries: Index entries pointing to deleted files ──
-  if (shouldRun('stale-entries')) {
+  if (shouldRun("stale-entries")) {
     for (const entry of indexEntries) {
       const entryPath = normalizePath(entry.path);
       const fullPath = join(wikiDir, entryPath);
       if (!(await fileExists(fullPath))) {
         findings.push({
-          severity: 'error',
-          category: 'stale-entries',
+          severity: "error",
+          category: "stale-entries",
           message: `Stale index entry "${entry.title}" points to missing file "${entryPath}"`,
           file: entryPath,
         });
@@ -164,19 +177,24 @@ export async function lintWiki(
   }
 
   // ── missing-pages: Unique missing link targets (deduped info) ──
-  if (shouldRun('missing-pages')) {
+  if (shouldRun("missing-pages")) {
     const missingSet = new Set<string>();
     for (const [, links] of pageLinks) {
       for (const linkRel of links) {
         const resolvedLink = resolve(wikiDir, linkRel);
         const normalizedRoot = normalizePath(root);
         const normalizedResolved = normalizePath(resolvedLink);
-        const withinBrain = normalizedResolved === normalizedRoot || normalizedResolved.startsWith(normalizedRoot + '/');
-        if ((!withinBrain || !(await fileExists(resolvedLink))) && !missingSet.has(linkRel)) {
+        const withinBrain =
+          normalizedResolved === normalizedRoot ||
+          normalizedResolved.startsWith(normalizedRoot + "/");
+        if (
+          (!withinBrain || !(await fileExists(resolvedLink))) &&
+          !missingSet.has(linkRel)
+        ) {
           missingSet.add(linkRel);
           findings.push({
-            severity: 'info',
-            category: 'missing-pages',
+            severity: "info",
+            category: "missing-pages",
             message: `Referenced page "${linkRel}" does not exist`,
             file: linkRel,
           });
@@ -186,8 +204,8 @@ export async function lintWiki(
   }
 
   // ── frontmatter-validation: Check page frontmatter fields ──
-  if (shouldRun('frontmatter-validation')) {
-    const validTypes = ['entity', 'concept', 'source', 'summary', 'query'];
+  if (shouldRun("frontmatter-validation")) {
+    const validTypes = ["entity", "concept", "source", "summary", "query"];
     for (const pagePath of wikiPages) {
       const pageRel = normalizePath(relative(wikiDir, pagePath));
       const fm = pageFrontmatter.get(pagePath);
@@ -195,24 +213,24 @@ export async function lintWiki(
 
       if (!fm.type) {
         findings.push({
-          severity: 'error',
-          category: 'frontmatter-validation',
+          severity: "error",
+          category: "frontmatter-validation",
           message: `Missing required "type" field in frontmatter of "${pageRel}"`,
           file: pageRel,
         });
       } else if (!validTypes.includes(fm.type)) {
         findings.push({
-          severity: 'warning',
-          category: 'frontmatter-validation',
-          message: `Invalid type "${fm.type}" in "${pageRel}" — expected one of: ${validTypes.join(', ')}`,
+          severity: "warning",
+          category: "frontmatter-validation",
+          message: `Invalid type "${fm.type}" in "${pageRel}" — expected one of: ${validTypes.join(", ")}`,
           file: pageRel,
         });
       }
 
       if (!fm.title) {
         findings.push({
-          severity: 'error',
-          category: 'frontmatter-validation',
+          severity: "error",
+          category: "frontmatter-validation",
           message: `Missing required "title" field in frontmatter of "${pageRel}"`,
           file: pageRel,
         });
@@ -220,8 +238,8 @@ export async function lintWiki(
 
       if (!fm.tags) {
         findings.push({
-          severity: 'info',
-          category: 'frontmatter-validation',
+          severity: "info",
+          category: "frontmatter-validation",
           message: `Missing recommended "tags" field in "${pageRel}"`,
           file: pageRel,
         });
@@ -229,8 +247,8 @@ export async function lintWiki(
 
       if (!fm.created) {
         findings.push({
-          severity: 'info',
-          category: 'frontmatter-validation',
+          severity: "info",
+          category: "frontmatter-validation",
           message: `Missing recommended "created" field in "${pageRel}"`,
           file: pageRel,
         });
@@ -238,9 +256,9 @@ export async function lintWiki(
     }
   }
 
-  const errorCount = findings.filter((f) => f.severity === 'error').length;
-  const warningCount = findings.filter((f) => f.severity === 'warning').length;
-  const infoCount = findings.filter((f) => f.severity === 'info').length;
+  const errorCount = findings.filter((f) => f.severity === "error").length;
+  const warningCount = findings.filter((f) => f.severity === "warning").length;
+  const infoCount = findings.filter((f) => f.severity === "info").length;
 
   const categorySummary: Record<string, number> = {};
   for (const f of findings) {
@@ -248,7 +266,7 @@ export async function lintWiki(
   }
 
   return {
-    command: 'lint',
+    command: "lint",
     api_version: API_VERSION,
     findings,
     errorCount,
@@ -273,9 +291,9 @@ export interface LintFixResult {
 
 /** Categories that lintFix can auto-fix. */
 const FIXABLE_CATEGORIES = new Set([
-  'stale-entries',
-  'index-completeness',
-  'frontmatter-validation',
+  "stale-entries",
+  "index-completeness",
+  "frontmatter-validation",
 ]);
 
 /**
@@ -283,8 +301,8 @@ const FIXABLE_CATEGORIES = new Set([
  * e.g. "entities/my-topic.md" → "My Topic"
  */
 function titleFromPath(relPath: string): string {
-  const stem = basename(relPath, '.md');
-  return stem.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const stem = basename(relPath, ".md");
+  return stem.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
@@ -293,8 +311,8 @@ function titleFromPath(relPath: string): string {
  */
 function categoryFromPath(relPath: string): string {
   const dir = dirname(relPath);
-  if (dir === '.') return 'Uncategorized';
-  const first = dir.split('/')[0];
+  if (dir === ".") return "Uncategorized";
+  const first = dir.split("/")[0];
   return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
@@ -316,8 +334,8 @@ export async function lintFix(
   options: LintFixOptions = {},
 ): Promise<LintFixResult> {
   const root = resolve(targetPath);
-  const wikiDir = join(root, 'wiki');
-  const indexPath = join(wikiDir, 'index.md');
+  const wikiDir = join(root, "wiki");
+  const indexPath = join(wikiDir, "index.md");
 
   // 1. Run full lint to get all findings
   const lintResult = await lintWiki(targetPath);
@@ -330,7 +348,7 @@ export async function lintFix(
   for (const finding of lintResult.findings) {
     if (FIXABLE_CATEGORIES.has(finding.category)) {
       fixableFindings.push(finding);
-    } else if (finding.category === 'orphan-pages' && options.fixOrphans) {
+    } else if (finding.category === "orphan-pages" && options.fixOrphans) {
       fixableFindings.push(finding);
     } else {
       remaining.push(finding);
@@ -338,7 +356,9 @@ export async function lintFix(
   }
 
   // 2. Fix stale-entries: remove index entries pointing to missing files
-  const staleFindings = fixableFindings.filter((f) => f.category === 'stale-entries');
+  const staleFindings = fixableFindings.filter(
+    (f) => f.category === "stale-entries",
+  );
   for (const finding of staleFindings) {
     if (!finding.file) {
       remaining.push(finding);
@@ -354,7 +374,7 @@ export async function lintFix(
 
   // 3. Fix index-completeness: add missing pages to index
   const missingIndexFindings = fixableFindings.filter(
-    (f) => f.category === 'index-completeness',
+    (f) => f.category === "index-completeness",
   );
   for (const finding of missingIndexFindings) {
     if (!finding.file) {
@@ -368,7 +388,7 @@ export async function lintFix(
       const entry: IndexEntry = {
         path: relPath,
         title: page.frontmatter.title || titleFromPath(relPath),
-        summary: '',
+        summary: "",
         category: categoryFromPath(relPath),
         tags: page.frontmatter.tags || [],
       };
@@ -381,7 +401,7 @@ export async function lintFix(
 
   // 4. Fix frontmatter-validation: add missing default fields
   const fmFindings = fixableFindings.filter(
-    (f) => f.category === 'frontmatter-validation',
+    (f) => f.category === "frontmatter-validation",
   );
 
   // Group frontmatter findings by file to batch writes per page
@@ -408,7 +428,7 @@ export async function lintFix(
       for (const finding of findings) {
         const msg = finding.message;
         if (msg.includes('Missing required "type"')) {
-          page.frontmatter.type = 'entity';
+          page.frontmatter.type = "entity";
           modified = true;
           fixedInPage.push(finding);
         } else if (msg.includes('Missing required "title"')) {
@@ -420,10 +440,10 @@ export async function lintFix(
           modified = true;
           fixedInPage.push(finding);
         } else if (msg.includes('Missing recommended "created"')) {
-          page.frontmatter.created = new Date().toISOString().split('T')[0];
+          page.frontmatter.created = new Date().toISOString().split("T")[0];
           modified = true;
           fixedInPage.push(finding);
-        } else if (msg.includes('Invalid type')) {
+        } else if (msg.includes("Invalid type")) {
           // Invalid type is not auto-fixable — requires human judgment
           remainingInPage.push(finding);
         } else {
@@ -444,7 +464,7 @@ export async function lintFix(
   // 5. Fix orphan-pages (only when fixOrphans is true): add to index
   if (options.fixOrphans) {
     const orphanFindings = fixableFindings.filter(
-      (f) => f.category === 'orphan-pages',
+      (f) => f.category === "orphan-pages",
     );
     for (const finding of orphanFindings) {
       if (!finding.file) {
@@ -458,7 +478,7 @@ export async function lintFix(
         const entry: IndexEntry = {
           path: relPath,
           title: page.frontmatter.title || titleFromPath(relPath),
-          summary: '',
+          summary: "",
           category: categoryFromPath(relPath),
           tags: page.frontmatter.tags || [],
         };
@@ -471,7 +491,7 @@ export async function lintFix(
   }
 
   return {
-    command: 'lint-fix',
+    command: "lint-fix",
     api_version: API_VERSION,
     fixed,
     remaining,

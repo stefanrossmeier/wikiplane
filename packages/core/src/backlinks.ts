@@ -1,5 +1,5 @@
-import { basename, dirname, join, relative } from 'node:path';
-import { listPages, readPage, getPageLinksDetailed } from './wiki.js';
+import { basename, dirname, join, relative } from "node:path";
+import { listPages, readPage, getPageLinksDetailed } from "./wiki.js";
 
 export interface BacklinkResult {
   /** Absolute path of the page containing the backlink */
@@ -28,7 +28,7 @@ export async function getBacklinks(
   const results: BacklinkResult[] = [];
 
   // Normalise target to forward-slash relative path
-  const normTarget = targetPage.replace(/\\/g, '/');
+  const normTarget = targetPage.replace(/\\/g, "/");
 
   for (const pagePath of pages) {
     const page = await readPage(pagePath);
@@ -38,12 +38,15 @@ export async function getBacklinks(
       // Resolve the link relative to the source page's directory
       const sourceDir = dirname(pagePath);
       const resolvedAbsolute = join(sourceDir, target);
-      const resolvedRelative = relative(wikiDir, resolvedAbsolute).replace(/\\/g, '/');
+      const resolvedRelative = relative(wikiDir, resolvedAbsolute).replace(
+        /\\/g,
+        "/",
+      );
 
       if (resolvedRelative === normTarget) {
         results.push({
           sourcePage: pagePath,
-          sourceTitle: page.frontmatter.title ?? basename(pagePath, '.md'),
+          sourceTitle: page.frontmatter.title ?? basename(pagePath, ".md"),
           linkText: text,
         });
       }

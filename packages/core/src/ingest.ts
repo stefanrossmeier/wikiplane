@@ -1,11 +1,11 @@
-import { readFile, stat, access, constants } from 'node:fs/promises';
-import { join, resolve, basename, dirname, extname, relative } from 'node:path';
-import { writePage, directoryExists } from './wiki.js';
-import { addEntry, removeEntry } from './index-ops.js';
-import { appendEntry } from './log.js';
-import { slugify } from './utils.js';
-import { API_VERSION } from './constants.js';
-import { isNotFoundError, isPermissionError } from './errors.js';
+import { readFile, stat, access, constants } from "node:fs/promises";
+import { join, resolve, basename, dirname, extname, relative } from "node:path";
+import { writePage, directoryExists } from "./wiki.js";
+import { addEntry, removeEntry } from "./index-ops.js";
+import { appendEntry } from "./log.js";
+import { slugify } from "./utils.js";
+import { API_VERSION } from "./constants.js";
+import { isNotFoundError, isPermissionError } from "./errors.js";
 
 /**
  * Result of running the ingest command.
@@ -13,7 +13,7 @@ import { isNotFoundError, isPermissionError } from './errors.js';
 export interface IngestResult {
   command: string;
   api_version: string;
-  status: 'success' | 'error' | 'skipped';
+  status: "success" | "error" | "skipped";
   pages_created: string[];
   pages_updated: string[];
   dry_run: boolean;
@@ -34,32 +34,36 @@ export async function ingestSource(
   force: boolean = false,
 ): Promise<IngestResult> {
   const root = resolve(targetPath);
-  const wikiDir = join(root, 'wiki');
-  const indexPath = join(wikiDir, 'index.md');
-  const logPath = join(wikiDir, 'log.md');
+  const wikiDir = join(root, "wiki");
+  const indexPath = join(wikiDir, "index.md");
+  const logPath = join(wikiDir, "log.md");
 
   // Validate wiki is initialized
   if (!(await directoryExists(wikiDir))) {
     return {
-      command: 'ingest',
+      command: "ingest",
       api_version: API_VERSION,
-      status: 'error',
+      status: "error",
       pages_created: [],
       pages_updated: [],
       dry_run: dryRun,
-      error: 'Wiki is not initialized. Run the "LLM Wiki: Initialize Wiki" command first.',
+      error:
+        'Wiki is not initialized. Run the "LLM Wiki: Initialize Wiki" command first.',
     };
   }
 
   // S-7: Prevent path traversal — source must be within project root
   const resolvedSource = resolve(sourcePath);
-  const normalizedSource = resolvedSource.replace(/\\/g, '/');
-  const projectRoot = dirname(root).replace(/\\/g, '/');
-  if (!normalizedSource.startsWith(projectRoot + '/') && normalizedSource !== projectRoot) {
+  const normalizedSource = resolvedSource.replace(/\\/g, "/");
+  const projectRoot = dirname(root).replace(/\\/g, "/");
+  if (
+    !normalizedSource.startsWith(projectRoot + "/") &&
+    normalizedSource !== projectRoot
+  ) {
     return {
-      command: 'ingest',
+      command: "ingest",
       api_version: API_VERSION,
-      status: 'error',
+      status: "error",
       pages_created: [],
       pages_updated: [],
       dry_run: dryRun,
@@ -73,9 +77,9 @@ export async function ingestSource(
   } catch (err) {
     if (isNotFoundError(err) || isPermissionError(err)) {
       return {
-        command: 'ingest',
+        command: "ingest",
         api_version: API_VERSION,
-        status: 'error',
+        status: "error",
         pages_created: [],
         pages_updated: [],
         dry_run: dryRun,
@@ -86,7 +90,7 @@ export async function ingestSource(
   }
 
   // Read source file
-  const sourceContent = await readFile(resolvedSource, 'utf-8');
+  const sourceContent = await readFile(resolvedSource, "utf-8");
   const sourceStat = await stat(resolvedSource);
   const sourceFilename = basename(resolvedSource);
   const sourceExt = extname(resolvedSource);
@@ -106,23 +110,24 @@ export async function ingestSource(
 
   if (summaryExists && !force) {
     return {
-      command: 'ingest',
+      command: "ingest",
       api_version: API_VERSION,
-      status: 'skipped',
+      status: "skipped",
       pages_created: [],
       pages_updated: [],
       dry_run: dryRun,
-      message: 'Source already ingested. Use --force to re-ingest.',
+      message: "Source already ingested. Use --force to re-ingest.",
     };
   }
 
   // Build content excerpt (first ~500 characters)
-  const excerpt = sourceContent.length > 500
-    ? sourceContent.slice(0, 500) + '…'
-    : sourceContent;
+  const excerpt =
+    sourceContent.length > 500
+      ? sourceContent.slice(0, 500) + "…"
+      : sourceContent;
 
   // Compute relative path from wiki root to source file
-  const relativeSourcePath = relative(root, resolvedSource).replace(/\\/g, '/');
+  const relativeSourcePath = relative(root, resolvedSource).replace(/\\/g, "/");
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -133,14 +138,14 @@ export async function ingestSource(
     // Create summary page
     await writePage(summaryFullPath, {
       frontmatter: {
-        type: 'source',
+        type: "source",
         title: sourceFilename,
         source_path: relativeSourcePath,
         ingested: today,
         created: today,
         tags: [],
       },
-      body: `# ${sourceFilename}\n\n**Source:** ${relativeSourcePath}  \n**Type:** ${sourceExt || 'unknown'}  \n**Size:** ${sourceStat.size} bytes  \n**Ingested:** ${today}\n\n## Content Preview\n\n${excerpt}`,
+      body: `# ${sourceFilename}\n\n**Source:** ${relativeSourcePath}  \n**Type:** ${sourceExt || "unknown"}  \n**Size:** ${sourceStat.size} bytes  \n**Ingested:** ${today}\n\n## Content Preview\n\n${excerpt}`,
     });
     pagesCreated.push(summaryRelPath);
 
@@ -151,28 +156,28 @@ export async function ingestSource(
     await addEntry(indexPath, {
       path: summaryRelPath,
       title: sourceFilename,
-      summary: `Source file (${sourceExt || 'unknown'})`,
-      category: 'Sources',
+      summary: `Source file (${sourceExt || "unknown"})`,
+      category: "Sources",
       tags: [],
     });
-    pagesUpdated.push('index.md');
+    pagesUpdated.push("index.md");
 
     // Append to log
     await appendEntry(logPath, {
-      verb: 'ingested',
+      verb: "ingested",
       subject: sourceFilename,
       details: `Ingested source "${sourceFilename}" → ${summaryRelPath}`,
     });
-    pagesUpdated.push('log.md');
+    pagesUpdated.push("log.md");
   } else {
     pagesCreated.push(summaryRelPath);
-    pagesUpdated.push('index.md', 'log.md');
+    pagesUpdated.push("index.md", "log.md");
   }
 
   return {
-    command: 'ingest',
+    command: "ingest",
     api_version: API_VERSION,
-    status: 'success',
+    status: "success",
     pages_created: pagesCreated,
     pages_updated: pagesUpdated,
     dry_run: dryRun,

@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 export function operationId(): string {
-  return `op_${randomUUID().replaceAll('-', '')}`;
+  return `op_${randomUUID().replaceAll("-", "")}`;
 }
 
 export function sourceId(): string {
-  return `src_${randomUUID().replaceAll('-', '')}`;
+  return `src_${randomUUID().replaceAll("-", "")}`;
 }
 
 export function isSourceId(value: string): boolean {

@@ -5,7 +5,7 @@
 
 ## Context
 
-PDF conversion and OCR are not byte-stable representations. Converter upgrades, formatting changes, or small transcription improvements can change bytes without changing source identity or useful semantics.
+Document conversion is not a byte-stable representation. Converter upgrades, formatting changes, or small transcription improvements can change bytes without changing source identity or useful semantics.
 
 Using a content hash as the identity/change rule would measure representation differences rather than the real source lifecycle.
 

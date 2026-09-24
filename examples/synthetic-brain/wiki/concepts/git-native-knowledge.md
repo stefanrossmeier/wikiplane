@@ -11,12 +11,15 @@ sources:
 created: 2026-09-24T00:00:00.000Z
 updated: 2026-09-24T00:00:00.000Z
 ---
+
 # Git-native knowledge
 
 ## Claims
 
 <!-- wikiplane:claims:src_example:start -->
+
 ### From [Wikiplane Example](../sources/src_example.md)
 
 - Wikiplane stores compiled knowledge as ordinary Markdown in Git.
+
 <!-- wikiplane:claims:src_example:end -->

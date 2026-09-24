@@ -1,12 +1,25 @@
-import matter from 'gray-matter';
-import { readFile, writeFile, readdir, stat, mkdir, unlink } from 'node:fs/promises';
-import { join, dirname, extname, relative, resolve } from 'node:path';
-import { isNotFoundError } from './errors.js';
-import { slugify } from './utils.js';
-import { addEntry, escapeMarkdownLinkText, readIndex, removeEntry, writeIndex } from './index-ops.js';
-import type { IndexEntry } from './index-ops.js';
-import { getBacklinks } from './backlinks.js';
-import type { BacklinkResult } from './backlinks.js';
+import matter from "gray-matter";
+import {
+  readFile,
+  writeFile,
+  readdir,
+  stat,
+  mkdir,
+  unlink,
+} from "node:fs/promises";
+import { join, dirname, extname, relative, resolve } from "node:path";
+import { isNotFoundError } from "./errors.js";
+import { slugify } from "./utils.js";
+import {
+  addEntry,
+  escapeMarkdownLinkText,
+  readIndex,
+  removeEntry,
+  writeIndex,
+} from "./index-ops.js";
+import type { IndexEntry } from "./index-ops.js";
+import { getBacklinks } from "./backlinks.js";
+import type { BacklinkResult } from "./backlinks.js";
 
 export interface WikiPageFrontmatter {
   type?: string;
@@ -24,7 +37,7 @@ export interface WikiPage {
 }
 
 export async function readPage(filePath: string): Promise<WikiPage> {
-  const raw = await readFile(filePath, 'utf-8');
+  const raw = await readFile(filePath, "utf-8");
   const { data, content } = matter(raw);
   return {
     frontmatter: data as WikiPageFrontmatter,
@@ -32,17 +45,20 @@ export async function readPage(filePath: string): Promise<WikiPage> {
   };
 }
 
-export async function writePage(filePath: string, page: WikiPage): Promise<void> {
+export async function writePage(
+  filePath: string,
+  page: WikiPage,
+): Promise<void> {
   await mkdir(dirname(filePath), { recursive: true });
   const output = matter.stringify(page.body, page.frontmatter);
-  await writeFile(filePath, output, 'utf-8');
+  await writeFile(filePath, output, "utf-8");
 }
 
 export async function listPages(wikiDir: string): Promise<string[]> {
   try {
     const entries = await readdir(wikiDir, { recursive: true });
     return entries
-      .filter((entry) => typeof entry === 'string' && extname(entry) === '.md')
+      .filter((entry) => typeof entry === "string" && extname(entry) === ".md")
       .map((entry) => join(wikiDir, entry as string));
   } catch (err) {
     if (isNotFoundError(err)) return [];
@@ -81,7 +97,11 @@ export function getPageLinksDetailed(content: string): PageLinkDetail[] {
   while ((match = linkRegex.exec(content)) !== null) {
     const text = match[1];
     const target = match[2];
-    if (target.endsWith('.md') && !target.startsWith('http://') && !target.startsWith('https://')) {
+    if (
+      target.endsWith(".md") &&
+      !target.startsWith("http://") &&
+      !target.startsWith("https://")
+    ) {
       links.push({ text, target });
     }
   }
@@ -114,7 +134,7 @@ export async function createEntityPage(
 
   await writePage(fullPath, {
     frontmatter: {
-      type: 'entity',
+      type: "entity",
       title: name,
       tags,
       created: now,
@@ -125,12 +145,12 @@ export async function createEntityPage(
   const indexEntry: IndexEntry = {
     path: relPath,
     title: name,
-    summary: '',
-    category: 'Entities',
+    summary: "",
+    category: "Entities",
     tags,
   };
 
-  const indexPath = join(wikiDir, 'index.md');
+  const indexPath = join(wikiDir, "index.md");
   await addEntry(indexPath, indexEntry);
 
   return { path: relPath, indexEntry };
@@ -153,7 +173,7 @@ export async function createConceptPage(
 
   await writePage(fullPath, {
     frontmatter: {
-      type: 'concept',
+      type: "concept",
       title: name,
       tags,
       created: now,
@@ -164,12 +184,12 @@ export async function createConceptPage(
   const indexEntry: IndexEntry = {
     path: relPath,
     title: name,
-    summary: '',
-    category: 'Concepts',
+    summary: "",
+    category: "Concepts",
     tags,
   };
 
-  const indexPath = join(wikiDir, 'index.md');
+  const indexPath = join(wikiDir, "index.md");
   await addEntry(indexPath, indexEntry);
 
   return { path: relPath, indexEntry };
@@ -214,7 +234,7 @@ export async function addCrosslinks(
     }
   }
   if (missing.length > 0) {
-    throw new Error(`Target pages not found: ${missing.join(', ')}`);
+    throw new Error(`Target pages not found: ${missing.join(", ")}`);
   }
 
   // Read the source page
@@ -229,16 +249,16 @@ export async function addCrosslinks(
       const targetPage = await readPage(toFull);
       title =
         (targetPage.frontmatter.title as string) ||
-        tp.replace(/\.md$/, '').split('/').pop()!;
+        tp.replace(/\.md$/, "").split("/").pop()!;
     } catch {
-      title = tp.replace(/\.md$/, '').split('/').pop()!;
+      title = tp.replace(/\.md$/, "").split("/").pop()!;
     }
-    const relLink = relative(dirname(fromFull), toFull).replace(/\\/g, '/');
+    const relLink = relative(dirname(fromFull), toFull).replace(/\\/g, "/");
     linkLines.push(`- [${escapeMarkdownLinkText(title)}](${relLink})`);
   }
 
   // Check if "## See also" section exists
-  const seeAlsoHeader = '## See also';
+  const seeAlsoHeader = "## See also";
   const seeAlsoIndex = page.body.indexOf(seeAlsoHeader);
 
   let newBody: string;
@@ -247,15 +267,17 @@ export async function addCrosslinks(
     const afterHeader = seeAlsoIndex + seeAlsoHeader.length;
     const nextHeadingMatch = page.body.slice(afterHeader).search(/\n## /);
     const sectionEnd =
-      nextHeadingMatch !== -1 ? afterHeader + nextHeadingMatch : page.body.length;
+      nextHeadingMatch !== -1
+        ? afterHeader + nextHeadingMatch
+        : page.body.length;
 
     // Get existing links to avoid duplicates
     const existingSection = page.body.slice(afterHeader, sectionEnd);
     const existingLinks = new Set(
       existingSection
-        .split('\n')
+        .split("\n")
         .map((l) => l.trim())
-        .filter((l) => l.startsWith('- [')),
+        .filter((l) => l.startsWith("- [")),
     );
 
     const newLinks = linkLines.filter((l) => !existingLinks.has(l));
@@ -264,10 +286,14 @@ export async function addCrosslinks(
     // Insert new links at the end of the existing section
     const before = page.body.slice(0, sectionEnd).trimEnd();
     const after = page.body.slice(sectionEnd);
-    newBody = before + '\n' + newLinks.join('\n') + after;
+    newBody = before + "\n" + newLinks.join("\n") + after;
   } else {
     newBody =
-      page.body.trimEnd() + '\n\n' + seeAlsoHeader + '\n\n' + linkLines.join('\n');
+      page.body.trimEnd() +
+      "\n\n" +
+      seeAlsoHeader +
+      "\n\n" +
+      linkLines.join("\n");
   }
 
   await writePage(fromFull, {
@@ -299,10 +325,15 @@ export async function deletePage(
   pagePath: string,
 ): Promise<DeleteResult> {
   // 1. Path traversal validation
-  const resolvedBase = resolve(wikiDir).replace(/\\/g, '/');
-  const resolvedFull = resolve(wikiDir, pagePath).replace(/\\/g, '/');
-  if (!resolvedFull.startsWith(resolvedBase + '/') && resolvedFull !== resolvedBase) {
-    throw new Error('Path traversal detected — pagePath must stay within wikiDir');
+  const resolvedBase = resolve(wikiDir).replace(/\\/g, "/");
+  const resolvedFull = resolve(wikiDir, pagePath).replace(/\\/g, "/");
+  if (
+    !resolvedFull.startsWith(resolvedBase + "/") &&
+    resolvedFull !== resolvedBase
+  ) {
+    throw new Error(
+      "Path traversal detected — pagePath must stay within wikiDir",
+    );
   }
 
   // 2. Validate page exists
@@ -320,7 +351,7 @@ export async function deletePage(
   const backlinkWarnings = await getBacklinks(wikiDir, pagePath);
 
   // 4. Remove index entry FIRST (safer order)
-  const indexPath = join(wikiDir, 'index.md');
+  const indexPath = join(wikiDir, "index.md");
   await removeEntry(indexPath, pagePath);
 
   // 5. Delete the file from disk
@@ -359,14 +390,24 @@ export async function renamePage(
   newPath: string,
 ): Promise<RenameResult> {
   // 1. Path traversal guard on BOTH paths
-  const resolvedBase = resolve(wikiDir).replace(/\\/g, '/');
-  const resolvedOld = resolve(wikiDir, oldPath).replace(/\\/g, '/');
-  if (!resolvedOld.startsWith(resolvedBase + '/') && resolvedOld !== resolvedBase) {
-    throw new Error('Path traversal detected — oldPath must stay within wikiDir');
+  const resolvedBase = resolve(wikiDir).replace(/\\/g, "/");
+  const resolvedOld = resolve(wikiDir, oldPath).replace(/\\/g, "/");
+  if (
+    !resolvedOld.startsWith(resolvedBase + "/") &&
+    resolvedOld !== resolvedBase
+  ) {
+    throw new Error(
+      "Path traversal detected — oldPath must stay within wikiDir",
+    );
   }
-  const resolvedNew = resolve(wikiDir, newPath).replace(/\\/g, '/');
-  if (!resolvedNew.startsWith(resolvedBase + '/') && resolvedNew !== resolvedBase) {
-    throw new Error('Path traversal detected — newPath must stay within wikiDir');
+  const resolvedNew = resolve(wikiDir, newPath).replace(/\\/g, "/");
+  if (
+    !resolvedNew.startsWith(resolvedBase + "/") &&
+    resolvedNew !== resolvedBase
+  ) {
+    throw new Error(
+      "Path traversal detected — newPath must stay within wikiDir",
+    );
   }
 
   // 2. Validate old page exists
@@ -394,13 +435,17 @@ export async function renamePage(
   const page = await readPage(oldFull);
 
   // 5. Update frontmatter title if it was path-derived
-  const oldStem = oldPath.replace(/\.md$/, '').split('/').pop()!;
-  const newStem = newPath.replace(/\.md$/, '').split('/').pop()!;
+  const oldStem = oldPath.replace(/\.md$/, "").split("/").pop()!;
+  const newStem = newPath.replace(/\.md$/, "").split("/").pop()!;
   if (page.frontmatter.title) {
-    const normalizedTitle = page.frontmatter.title.toLowerCase().replace(/[\s_-]+/g, '-');
-    const normalizedOldStem = oldStem.toLowerCase().replace(/[\s_-]+/g, '-');
+    const normalizedTitle = page.frontmatter.title
+      .toLowerCase()
+      .replace(/[\s_-]+/g, "-");
+    const normalizedOldStem = oldStem.toLowerCase().replace(/[\s_-]+/g, "-");
     if (normalizedTitle === normalizedOldStem) {
-      page.frontmatter.title = newStem.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      page.frontmatter.title = newStem
+        .replace(/[-_]/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
     }
   }
 
@@ -409,15 +454,19 @@ export async function renamePage(
 
   // 7. Scan ALL wiki pages for links to oldPath and rewrite them
   const allPages = await listPages(wikiDir);
-  const normOld = oldPath.replace(/\\/g, '/');
+  const normOld = oldPath.replace(/\\/g, "/");
   const affectedPages: string[] = [];
   let rewrittenLinks = 0;
 
   for (const absPagePath of allPages) {
     // Skip the old file itself (it's about to be deleted)
-    if (resolve(absPagePath).replace(/\\/g, '/') === resolvedOld) continue;
+    if (resolve(absPagePath).replace(/\\/g, "/") === resolvedOld) continue;
     // Skip the new file (just written)
-    if (resolve(absPagePath).replace(/\\/g, '/') === resolve(newFull).replace(/\\/g, '/')) continue;
+    if (
+      resolve(absPagePath).replace(/\\/g, "/") ===
+      resolve(newFull).replace(/\\/g, "/")
+    )
+      continue;
 
     const sourcePage = await readPage(absPagePath);
     const links = getPageLinksDetailed(sourcePage.body);
@@ -427,11 +476,17 @@ export async function renamePage(
     for (const { text, target } of links) {
       const sourceDir = dirname(absPagePath);
       const resolvedAbsolute = join(sourceDir, target);
-      const resolvedRelative = relative(wikiDir, resolvedAbsolute).replace(/\\/g, '/');
+      const resolvedRelative = relative(wikiDir, resolvedAbsolute).replace(
+        /\\/g,
+        "/",
+      );
 
       if (resolvedRelative === normOld) {
         // Compute new relative link from this source page to new location
-        const newRelLink = relative(dirname(absPagePath), newFull).replace(/\\/g, '/');
+        const newRelLink = relative(dirname(absPagePath), newFull).replace(
+          /\\/g,
+          "/",
+        );
         // Replace the exact link in body
         const oldLink = `[${text}](${target})`;
         const newLink = `[${text}](${newRelLink})`;
@@ -442,14 +497,17 @@ export async function renamePage(
     }
 
     if (modified) {
-      await writePage(absPagePath, { frontmatter: sourcePage.frontmatter, body: updatedBody });
-      const relSourcePath = relative(wikiDir, absPagePath).replace(/\\/g, '/');
+      await writePage(absPagePath, {
+        frontmatter: sourcePage.frontmatter,
+        body: updatedBody,
+      });
+      const relSourcePath = relative(wikiDir, absPagePath).replace(/\\/g, "/");
       affectedPages.push(relSourcePath);
     }
   }
 
   // 8. Update index entry
-  const indexPath = join(wikiDir, 'index.md');
+  const indexPath = join(wikiDir, "index.md");
   const entries = await readIndex(indexPath);
   const entryIdx = entries.findIndex((e) => e.path === oldPath);
   if (entryIdx >= 0) {

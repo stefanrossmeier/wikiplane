@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { initWiki } from '@wikiplane/core';
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { initWiki } from "@wikiplane/core";
 
 export const DEFAULT_AGENTS_TEMPLATE = `# AGENTS.md
 
@@ -45,18 +45,21 @@ export async function initializeBrain(
   await mkdir(brainRoot, { recursive: true });
   await initWiki(brainRoot);
   await Promise.all([
-    mkdir(join(brainRoot, 'raw'), { recursive: true }),
-    mkdir(join(brainRoot, 'wiki', 'sources'), { recursive: true }),
-    mkdir(join(brainRoot, 'wiki', 'concepts'), { recursive: true }),
-    mkdir(join(brainRoot, 'wiki', 'entities'), { recursive: true }),
+    mkdir(join(brainRoot, "raw"), { recursive: true }),
+    mkdir(join(brainRoot, "wiki", "sources"), { recursive: true }),
+    mkdir(join(brainRoot, "wiki", "concepts"), { recursive: true }),
+    mkdir(join(brainRoot, "wiki", "entities"), { recursive: true }),
   ]);
-  await ensureTextFile(join(brainRoot, 'AGENTS.md'), agentsTemplate.trim() + '\n');
+  await ensureTextFile(
+    join(brainRoot, "AGENTS.md"),
+    agentsTemplate.trim() + "\n",
+  );
   await ensureReadme(brainRoot);
 }
 
 async function ensureReadme(brainRoot: string): Promise<void> {
   await ensureTextFile(
-    join(brainRoot, 'README.md'),
+    join(brainRoot, "README.md"),
     `# Wikiplane Brain
 
 This repository is storage managed by Wikiplane.
@@ -75,10 +78,10 @@ The repository intentionally contains no Wikiplane runtime code, credentials, Do
 
 async function ensureTextFile(path: string, content: string): Promise<void> {
   try {
-    const existing = await readFile(path, 'utf8');
+    const existing = await readFile(path, "utf8");
     if (existing.trim()) return;
   } catch {
     // Create below.
   }
-  await writeFile(path, content, 'utf8');
+  await writeFile(path, content, "utf8");
 }

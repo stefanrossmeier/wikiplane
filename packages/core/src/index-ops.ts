@@ -1,6 +1,6 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import { isNotFoundError } from './errors.js';
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+import { isNotFoundError } from "./errors.js";
 
 export interface IndexEntry {
   path: string;
@@ -17,12 +17,12 @@ export interface FindOptions {
 
 /** Escape characters that have special meaning inside markdown link text. */
 export function escapeMarkdownLinkText(text: string): string {
-  return text.replace(/([[\]()])/g, '\\$1');
+  return text.replace(/([[\]()])/g, "\\$1");
 }
 
 /** Unescape markdown link text that was escaped by escapeMarkdownLinkText. */
 function unescapeMarkdownLinkText(text: string): string {
-  return text.replace(/\\([[\]()])/g, '$1');
+  return text.replace(/\\([[\]()])/g, "$1");
 }
 
 /**
@@ -33,7 +33,9 @@ function unescapeMarkdownLinkText(text: string): string {
 function parseEntryLine(line: string, category: string): IndexEntry | null {
   const trimmed = line.trim();
   // Support both escaped and unescaped brackets in titles
-  const entryMatch = trimmed.match(/^-\s+\[((?:[^\]\\]|\\.)+)\]\(((?:[^)\\]|\\.)+)\)(.*)$/);
+  const entryMatch = trimmed.match(
+    /^-\s+\[((?:[^\]\\]|\\.)+)\]\(((?:[^)\\]|\\.)+)\)(.*)$/,
+  );
   if (!entryMatch) {
     return null;
   }
@@ -42,7 +44,7 @@ function parseEntryLine(line: string, category: string): IndexEntry | null {
   const path = entryMatch[2];
   const rest = entryMatch[3].trim();
 
-  let summaryText = '';
+  let summaryText = "";
   const tags: string[] = [];
 
   if (rest) {
@@ -58,7 +60,7 @@ function parseEntryLine(line: string, category: string): IndexEntry | null {
     }
 
     // Summary is everything except tags, trimmed
-    summaryText = afterDash.replace(/#[\w-]+/g, '').trim();
+    summaryText = afterDash.replace(/#[\w-]+/g, "").trim();
   }
 
   return { path, title, summary: summaryText, category, tags };
@@ -74,10 +76,10 @@ function formatEntryLine(entry: IndexEntry): string {
     parts.push(entry.summary);
   }
   if (entry.tags.length > 0) {
-    parts.push(entry.tags.map((t) => `#${t}`).join(' '));
+    parts.push(entry.tags.map((t) => `#${t}`).join(" "));
   }
   if (parts.length > 0) {
-    line += ` — ${parts.join(' ')}`;
+    line += ` — ${parts.join(" ")}`;
   }
   return line;
 }
@@ -89,16 +91,16 @@ function formatEntryLine(entry: IndexEntry): string {
 export async function readIndex(filePath: string): Promise<IndexEntry[]> {
   let content: string;
   try {
-    content = await readFile(filePath, 'utf-8');
+    content = await readFile(filePath, "utf-8");
   } catch (err) {
     if (isNotFoundError(err)) return [];
     throw err;
   }
 
   const entries: IndexEntry[] = [];
-  let currentCategory = '';
+  let currentCategory = "";
 
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     const trimmed = line.trim();
 
     // Detect H2 category heading
@@ -137,17 +139,17 @@ export async function writeIndex(
     categories.get(entry.category)!.push(entry);
   }
 
-  let output = '# Wiki Index\n';
+  let output = "# Wiki Index\n";
 
   for (const [category, categoryEntries] of categories) {
     output += `\n## ${category}\n\n`;
     for (const entry of categoryEntries) {
-      output += formatEntryLine(entry) + '\n';
+      output += formatEntryLine(entry) + "\n";
     }
   }
 
   await mkdir(dirname(filePath), { recursive: true });
-  await writeFile(filePath, output, 'utf-8');
+  await writeFile(filePath, output, "utf-8");
 }
 
 /**
@@ -183,7 +185,7 @@ export async function removeEntry(
 export async function updateIndexEntry(
   filePath: string,
   pagePath: string,
-  updates: Partial<Omit<IndexEntry, 'path'>>,
+  updates: Partial<Omit<IndexEntry, "path">>,
 ): Promise<boolean> {
   const entries = await readIndex(filePath);
   const idx = entries.findIndex((e) => e.path === pagePath);
@@ -222,4 +224,3 @@ export function findEntries(
     return true;
   });
 }
-

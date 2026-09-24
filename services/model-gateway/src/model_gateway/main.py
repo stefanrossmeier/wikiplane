@@ -56,7 +56,6 @@ def load_aliases() -> dict[str, str]:
         "wikiplane-integrate",
         "wikiplane-crosslink",
         "wikiplane-query",
-        "wikiplane-ocr",
         "wikiplane-judge",
     ):
         env = "MODEL_ALIAS_" + alias.upper().replace("-", "_")

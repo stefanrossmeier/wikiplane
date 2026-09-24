@@ -1,4 +1,4 @@
-export type SourceKind = 'remote' | 'local';
+export type SourceKind = "remote" | "local";
 
 export interface AcquireRequest {
   source: string;
@@ -32,40 +32,31 @@ export interface SourceAcquirer {
 export interface DocumentConverter {
   readonly name: string;
   supports(artifact: AcquiredArtifact): boolean;
-  convert(artifact: AcquiredArtifact, outputDir: string): Promise<ConvertedSource>;
+  convert(
+    artifact: AcquiredArtifact,
+    outputDir: string,
+  ): Promise<ConvertedSource>;
 }
 
 export interface WebConverter {
   readonly name: string;
-  convert(artifact: AcquiredArtifact, outputDir: string): Promise<ConvertedSource>;
+  convert(
+    artifact: AcquiredArtifact,
+    outputDir: string,
+  ): Promise<ConvertedSource>;
 }
 
-export interface OcrRequest {
-  imagePath: string;
-  prompt?: string;
-}
-
-export interface OcrResult {
-  text: string;
-  model?: string;
-  usage?: Record<string, unknown>;
-}
-
-export interface OcrProvider {
-  transcribe(request: OcrRequest): Promise<OcrResult>;
-}
-
-export type ModelRole = 'integrate' | 'crosslink' | 'query' | 'ocr' | 'judge';
+export type ModelRole = "integrate" | "crosslink" | "query" | "judge";
 
 export interface ModelMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
 export interface ModelRequest {
   role: ModelRole;
   messages: ModelMessage[];
-  responseFormat?: 'text' | 'json_object';
+  responseFormat?: "text" | "json_object";
   timeoutMs?: number;
   metadata?: Record<string, unknown>;
 }

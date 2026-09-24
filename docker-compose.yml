@@ -15,7 +15,13 @@ services:
       markitdown:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8020').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8020').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 4s
       retries: 5
@@ -31,7 +37,6 @@ services:
       MODEL_ALIAS_WIKIPLANE_INTEGRATE: ${MODEL_ALIAS_WIKIPLANE_INTEGRATE:-}
       MODEL_ALIAS_WIKIPLANE_CROSSLINK: ${MODEL_ALIAS_WIKIPLANE_CROSSLINK:-}
       MODEL_ALIAS_WIKIPLANE_QUERY: ${MODEL_ALIAS_WIKIPLANE_QUERY:-}
-      MODEL_ALIAS_WIKIPLANE_OCR: ${MODEL_ALIAS_WIKIPLANE_OCR:-}
       MODEL_ALIAS_WIKIPLANE_JUDGE: ${MODEL_ALIAS_WIKIPLANE_JUDGE:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     volumes:
@@ -43,13 +48,8 @@ services:
       context: ./services/markitdown
     environment:
       WORKSPACE_ROOT: /workspace
-      MODEL_GATEWAY_OPENAI_BASE_URL: http://model-gateway:8000/v1
-      OCR_MODEL_ALIAS: wikiplane-ocr
     volumes:
       - wikiplane-workspace:/workspace
-    depends_on:
-      model-gateway:
-        condition: service_healthy
     networks: [wikiplane-internal]
 
 volumes:

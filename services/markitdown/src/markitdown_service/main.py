@@ -17,7 +17,6 @@ app = FastAPI(title="Wikiplane MarkItDown Service", version=__version__)
 class ConvertRequest(BaseModel):
     input_path: str
     output_dir: str
-    use_ocr: bool = True
 
 
 def workspace_root() -> Path:
@@ -67,7 +66,6 @@ def health() -> dict[str, Any]:
         "status": "ok",
         "service": "markitdown",
         "version": __version__,
-        "ocr_model": os.environ.get("OCR_MODEL_ALIAS", "wikiplane-ocr"),
     }
 
 
@@ -80,30 +78,7 @@ def convert(request: ConvertRequest) -> dict[str, Any]:
 
         from markitdown import MarkItDown
 
-        kwargs: dict[str, Any] = {}
-        if request.use_ocr:
-            from openai import OpenAI
-
-            kwargs.update(
-                {
-                    "enable_plugins": True,
-                    "llm_client": OpenAI(
-                        api_key=os.environ.get("MODEL_GATEWAY_API_KEY", "wikiplane-internal"),
-                        base_url=os.environ.get(
-                            "MODEL_GATEWAY_OPENAI_BASE_URL",
-                            "http://model-gateway:8000/v1",
-                        ),
-                        max_retries=int(os.environ.get("OCR_CLIENT_RETRIES", "2")),
-                    ),
-                    "llm_model": os.environ.get("OCR_MODEL_ALIAS", "wikiplane-ocr"),
-                    "llm_prompt": os.environ.get(
-                        "OCR_PROMPT",
-                        "Transcribe all visible text faithfully. Preserve reading order, headings, tables, labels, and mixed-language text.",
-                    ),
-                }
-            )
-
-        converter = MarkItDown(**kwargs)
+        converter = MarkItDown()
         convert_local = getattr(converter, "convert_local", None)
         result = convert_local(str(input_path)) if callable(convert_local) else converter.convert(str(input_path))
         markdown = result_markdown(result).strip() + "\n"
@@ -112,7 +87,6 @@ def convert(request: ConvertRequest) -> dict[str, Any]:
         result_path = output_dir / f"{safe_stem(input_path)}.result.json"
         markdown_path.write_text(markdown, encoding="utf-8")
         diagnostics = {
-            "ocr_enabled": request.use_ocr,
             "input_suffix": input_path.suffix.lower(),
             "markdown_characters": len(markdown),
         }

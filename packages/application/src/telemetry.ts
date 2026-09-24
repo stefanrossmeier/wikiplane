@@ -1,19 +1,25 @@
-import { appendFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { appendFile, mkdir } from "node:fs/promises";
+import { join } from "node:path";
 
 export class OperationTelemetry {
   private readonly path: string;
 
-  constructor(root: string, readonly operationId: string) {
-    this.path = join(root, 'telemetry', `${operationId}.jsonl`);
+  constructor(
+    root: string,
+    readonly operationId: string,
+  ) {
+    this.path = join(root, "telemetry", `${operationId}.jsonl`);
   }
 
-  async event(event: string, data: Record<string, unknown> = {}): Promise<void> {
-    await mkdir(join(this.path, '..'), { recursive: true });
+  async event(
+    event: string,
+    data: Record<string, unknown> = {},
+  ): Promise<void> {
+    await mkdir(join(this.path, ".."), { recursive: true });
     await appendFile(
       this.path,
       `${JSON.stringify({ ts: new Date().toISOString(), operation_id: this.operationId, event, ...data })}\n`,
-      'utf8',
+      "utf8",
     );
   }
 
@@ -22,7 +28,9 @@ export class OperationTelemetry {
     await this.event(`${name}_started`);
     try {
       const result = await fn();
-      await this.event(`${name}_completed`, { duration_ms: Math.round(performance.now() - started) });
+      await this.event(`${name}_completed`, {
+        duration_ms: Math.round(performance.now() - started),
+      });
       return result;
     } catch (error) {
       await this.event(`${name}_failed`, {

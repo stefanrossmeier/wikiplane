@@ -9,7 +9,6 @@ Wikiplane treats the following as untrusted:
 - remote URLs and remote response data;
 - downloaded PDFs/HTML/documents;
 - converted Markdown;
-- OCR output;
 - model responses;
 - source-provided links and metadata.
 

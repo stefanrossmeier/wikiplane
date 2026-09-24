@@ -13,4 +13,3 @@ Added page for Claude Shannon, father of information theory.
 ## [2026-02-15] linked | Alan Turing
 
 Added cross-references to Claude Shannon and Neural Networks pages.
-

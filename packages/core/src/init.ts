@@ -1,8 +1,8 @@
-import { mkdir, stat, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
-import { appendEntry } from './log.js';
-import { API_VERSION } from './constants.js';
-import { isNotFoundError } from './errors.js';
+import { mkdir, stat, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { appendEntry } from "./log.js";
+import { API_VERSION } from "./constants.js";
+import { isNotFoundError } from "./errors.js";
 
 /**
  * Result of running the init command.
@@ -10,7 +10,7 @@ import { isNotFoundError } from './errors.js';
 export interface InitResult {
   command: string;
   api_version: string;
-  status: 'created' | 'already_initialized';
+  status: "created" | "already_initialized";
   created_dirs: string[];
   created_files: string[];
   warning?: string;
@@ -18,11 +18,11 @@ export interface InitResult {
 
 /** Directories created by init, relative to root. */
 const DIRS = [
-  'raw',
-  'wiki',
-  'wiki/entities',
-  'wiki/concepts',
-  'wiki/sources',
+  "raw",
+  "wiki",
+  "wiki/entities",
+  "wiki/concepts",
+  "wiki/sources",
 ] as const;
 
 /** The starter wiki/index.md with empty category sections. */
@@ -76,19 +76,19 @@ Use relative Markdown links. Prefer precise authored forward links. Backlinks ar
  */
 export async function initWiki(targetPath: string): Promise<InitResult> {
   const root = resolve(targetPath);
-  const wikiDir = join(root, 'wiki');
+  const wikiDir = join(root, "wiki");
 
   // Detect if already initialized
   try {
     const wikiStat = await stat(wikiDir);
     if (wikiStat.isDirectory()) {
       return {
-        command: 'init',
+        command: "init",
         api_version: API_VERSION,
-        status: 'already_initialized',
+        status: "already_initialized",
         created_dirs: [],
         created_files: [],
-        warning: 'Wiki is already initialized (wiki/ directory exists)',
+        warning: "Wiki is already initialized (wiki/ directory exists)",
       };
     }
   } catch (err) {
@@ -102,27 +102,27 @@ export async function initWiki(targetPath: string): Promise<InitResult> {
   }
 
   // Create wiki/index.md with category sections
-  const indexPath = join(root, 'wiki', 'index.md');
-  await writeFile(indexPath, INDEX_CONTENT, 'utf-8');
+  const indexPath = join(root, "wiki", "index.md");
+  await writeFile(indexPath, INDEX_CONTENT, "utf-8");
 
   // Create wiki/log.md with initialization entry
-  const logPath = join(root, 'wiki', 'log.md');
+  const logPath = join(root, "wiki", "log.md");
   await appendEntry(logPath, {
-    verb: 'initialized',
-    subject: 'wiki',
-    details: 'Wiki knowledge base initialized.',
+    verb: "initialized",
+    subject: "wiki",
+    details: "Wiki knowledge base initialized.",
   });
 
   // Create AGENTS.md with starter schema
-  const agentsPath = join(root, 'AGENTS.md');
-  await writeFile(agentsPath, AGENTS_CONTENT, 'utf-8');
+  const agentsPath = join(root, "AGENTS.md");
+  await writeFile(agentsPath, AGENTS_CONTENT, "utf-8");
 
-  const createdFiles = ['wiki/index.md', 'wiki/log.md', 'AGENTS.md'];
+  const createdFiles = ["wiki/index.md", "wiki/log.md", "AGENTS.md"];
 
   return {
-    command: 'init',
+    command: "init",
     api_version: API_VERSION,
-    status: 'created',
+    status: "created",
     created_dirs: [...DIRS],
     created_files: createdFiles,
   };

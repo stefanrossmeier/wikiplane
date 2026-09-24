@@ -5,7 +5,7 @@
 
 ## Context
 
-Document conversion, OCR, model providers, web extraction, acquisition, and Git hosting may change over time. Letting semantic compiler logic import provider-specific libraries would turn implementation choices into architecture lock-in.
+Document conversion, model providers, web extraction, acquisition, and Git hosting may change over time. Letting semantic compiler logic import provider-specific libraries would turn implementation choices into architecture lock-in.
 
 ## Decision
 
@@ -14,7 +14,6 @@ Core/application code depends on Wikiplane-owned ports such as:
 - `SourceAcquirer`;
 - `DocumentConverter`;
 - `WebConverter`;
-- `OcrProvider`;
 - `ModelProvider`;
 - `RepositoryProvider`.
 

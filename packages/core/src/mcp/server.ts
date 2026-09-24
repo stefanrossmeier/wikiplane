@@ -1,13 +1,13 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import { READ_TOOLS, handleReadToolCall } from './read-tools.js';
-import type { ToolArgs } from './read-tools.js';
-import { WRITE_TOOLS, handleWriteToolCall } from './write-tools.js';
-import { registerResources } from './resources.js';
-import { registerPrompts } from './prompts.js';
+} from "@modelcontextprotocol/sdk/types.js";
+import { READ_TOOLS, handleReadToolCall } from "./read-tools.js";
+import type { ToolArgs } from "./read-tools.js";
+import { WRITE_TOOLS, handleWriteToolCall } from "./write-tools.js";
+import { registerResources } from "./resources.js";
+import { registerPrompts } from "./prompts.js";
 
 const READ_TOOL_NAMES = new Set(READ_TOOLS.map((t) => t.name));
 const WRITE_TOOL_NAMES = new Set(WRITE_TOOLS.map((t) => t.name));
@@ -24,7 +24,7 @@ const WRITE_TOOL_NAMES = new Set(WRITE_TOOLS.map((t) => t.name));
  */
 export function createMcpServer(wikiRoot: string): Server {
   const server = new Server(
-    { name: 'llmwiki', version: '0.1.0' },
+    { name: "llmwiki", version: "0.1.0" },
     { capabilities: { tools: {}, resources: {}, prompts: {} } },
   );
 
@@ -39,17 +39,25 @@ export function createMcpServer(wikiRoot: string): Server {
     try {
       let text: string;
       if (READ_TOOL_NAMES.has(name)) {
-        text = await handleReadToolCall(name, (args ?? {}) as ToolArgs, wikiRoot);
+        text = await handleReadToolCall(
+          name,
+          (args ?? {}) as ToolArgs,
+          wikiRoot,
+        );
       } else if (WRITE_TOOL_NAMES.has(name)) {
-        text = await handleWriteToolCall(name, (args ?? {}) as ToolArgs, wikiRoot);
+        text = await handleWriteToolCall(
+          name,
+          (args ?? {}) as ToolArgs,
+          wikiRoot,
+        );
       } else {
         throw new Error(`Unknown tool: ${name}`);
       }
-      return { content: [{ type: 'text' as const, text }] };
+      return { content: [{ type: "text" as const, text }] };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       return {
-        content: [{ type: 'text' as const, text: `Error: ${message}` }],
+        content: [{ type: "text" as const, text: `Error: ${message}` }],
         isError: true,
       };
     }

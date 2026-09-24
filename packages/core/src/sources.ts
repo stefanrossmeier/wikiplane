@@ -1,6 +1,6 @@
-import { readdir, stat } from 'node:fs/promises';
-import { join, extname, basename } from 'node:path';
-import { isNotFoundError } from './errors.js';
+import { readdir, stat } from "node:fs/promises";
+import { join, extname, basename } from "node:path";
+import { isNotFoundError } from "./errors.js";
 
 export interface SourceFile {
   /** File name including extension */
@@ -22,7 +22,9 @@ export interface SourceFile {
 export async function listSources(rawDir: string): Promise<SourceFile[]> {
   let entries: string[];
   try {
-    entries = await readdir(rawDir, { recursive: true }) as unknown as string[];
+    entries = (await readdir(rawDir, {
+      recursive: true,
+    })) as unknown as string[];
   } catch (err) {
     if (isNotFoundError(err)) return [];
     throw err;
@@ -37,7 +39,7 @@ export async function listSources(rawDir: string): Promise<SourceFile[]> {
       if (s.isFile()) {
         results.push({
           name: basename(entry),
-          path: entry.replace(/\\/g, '/'),
+          path: entry.replace(/\\/g, "/"),
           size: s.size,
           modified: s.mtime.toISOString(),
           extension: extname(entry),

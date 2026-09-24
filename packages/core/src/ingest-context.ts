@@ -1,8 +1,8 @@
-import { readFile } from 'node:fs/promises';
-import { resolve, dirname, extname } from 'node:path';
-import { ingestSource, type IngestResult } from './ingest.js';
-import { queryWiki, type QueryResult } from './query.js';
-import { isNotFoundError, isPermissionError } from './errors.js';
+import { readFile } from "node:fs/promises";
+import { resolve, dirname, extname } from "node:path";
+import { ingestSource, type IngestResult } from "./ingest.js";
+import { queryWiki, type QueryResult } from "./query.js";
+import { isNotFoundError, isPermissionError } from "./errors.js";
 
 /** Info about a related wiki page */
 export interface PageInfo {
@@ -28,39 +28,120 @@ export interface IngestWithContextResult {
 
 // Common English stop words to filter out when extracting keywords
 const STOP_WORDS = new Set([
-  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-  'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been',
-  'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-  'could', 'should', 'may', 'might', 'shall', 'can', 'this', 'that',
-  'these', 'those', 'it', 'its', 'not', 'no', 'as', 'if', 'then',
-  'than', 'so', 'such', 'when', 'where', 'how', 'what', 'which', 'who',
-  'whom', 'we', 'he', 'she', 'they', 'you', 'i', 'me', 'my', 'your',
-  'his', 'her', 'our', 'their', 'us', 'them', 'about', 'up', 'out',
-  'just', 'also', 'very', 'all', 'any', 'each', 'every', 'both',
-  'few', 'more', 'most', 'other', 'some', 'only', 'own', 'same',
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "but",
+  "in",
+  "on",
+  "at",
+  "to",
+  "for",
+  "of",
+  "with",
+  "by",
+  "from",
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "being",
+  "have",
+  "has",
+  "had",
+  "do",
+  "does",
+  "did",
+  "will",
+  "would",
+  "could",
+  "should",
+  "may",
+  "might",
+  "shall",
+  "can",
+  "this",
+  "that",
+  "these",
+  "those",
+  "it",
+  "its",
+  "not",
+  "no",
+  "as",
+  "if",
+  "then",
+  "than",
+  "so",
+  "such",
+  "when",
+  "where",
+  "how",
+  "what",
+  "which",
+  "who",
+  "whom",
+  "we",
+  "he",
+  "she",
+  "they",
+  "you",
+  "i",
+  "me",
+  "my",
+  "your",
+  "his",
+  "her",
+  "our",
+  "their",
+  "us",
+  "them",
+  "about",
+  "up",
+  "out",
+  "just",
+  "also",
+  "very",
+  "all",
+  "any",
+  "each",
+  "every",
+  "both",
+  "few",
+  "more",
+  "most",
+  "other",
+  "some",
+  "only",
+  "own",
+  "same",
 ]);
 
 /** Detect content type from file extension */
 export function detectContentType(filePath: string): string {
   const ext = extname(filePath).toLowerCase();
   const typeMap: Record<string, string> = {
-    '.md': 'markdown',
-    '.txt': 'text',
-    '.pdf': 'pdf',
-    '.html': 'html',
-    '.htm': 'html',
-    '.json': 'json',
-    '.csv': 'csv',
-    '.xml': 'xml',
-    '.yaml': 'yaml',
-    '.yml': 'yaml',
-    '.rst': 'restructuredtext',
-    '.tex': 'latex',
-    '.doc': 'word',
-    '.docx': 'word',
-    '.rtf': 'richtext',
+    ".md": "markdown",
+    ".txt": "text",
+    ".pdf": "pdf",
+    ".html": "html",
+    ".htm": "html",
+    ".json": "json",
+    ".csv": "csv",
+    ".xml": "xml",
+    ".yaml": "yaml",
+    ".yml": "yaml",
+    ".rst": "restructuredtext",
+    ".tex": "latex",
+    ".doc": "word",
+    ".docx": "word",
+    ".rtf": "richtext",
   };
-  return typeMap[ext] ?? 'unknown';
+  return typeMap[ext] ?? "unknown";
 }
 
 /** Count words in text */
@@ -75,7 +156,7 @@ export function extractKeywords(text: string, maxWords = 200): string[] {
   const words = text
     .slice(0, maxWords * 10) // rough char limit for perf
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
 
@@ -98,36 +179,36 @@ function generateSuggestedActions(
 ): string[] {
   const actions: string[] = [];
 
-  if (ingestResult.status === 'error') {
-    actions.push('Fix the ingest error and retry');
+  if (ingestResult.status === "error") {
+    actions.push("Fix the ingest error and retry");
     return actions;
   }
 
-  if (ingestResult.status === 'skipped') {
-    actions.push('Use force=true to re-ingest this source');
+  if (ingestResult.status === "skipped") {
+    actions.push("Use force=true to re-ingest this source");
     return actions;
   }
 
   // Success case
-  actions.push('Review the generated summary page for accuracy');
+  actions.push("Review the generated summary page for accuracy");
   actions.push(
-    'Create entity pages for mentioned people, organizations, or concepts',
+    "Create entity pages for mentioned people, organizations, or concepts",
   );
 
   if (relatedPages.length > 0) {
     actions.push(
-      'Add crosslinks between the new page and related existing pages',
+      "Add crosslinks between the new page and related existing pages",
     );
     actions.push(
-      'Update existing related pages with new information from this source',
+      "Update existing related pages with new information from this source",
     );
   } else {
     actions.push(
-      'Consider creating foundational concept pages to build wiki structure',
+      "Consider creating foundational concept pages to build wiki structure",
     );
   }
 
-  actions.push('Update the wiki index if additional metadata is needed');
+  actions.push("Update the wiki index if additional metadata is needed");
 
   return actions;
 }
@@ -150,24 +231,27 @@ export async function ingestWithContext(
   force = false,
 ): Promise<IngestWithContextResult> {
   // Read source content for analysis (before ingest, so we can get word count even on error)
-  let sourceContent = '';
+  let sourceContent = "";
   let wordCount = 0;
   const contentType = detectContentType(sourcePath);
 
   // S-7: Prevent path traversal — source must be within project root
   const resolvedSource = resolve(sourcePath);
-  const normalizedSource = resolvedSource.replace(/\\/g, '/');
-  const projectRoot = dirname(resolve(targetPath)).replace(/\\/g, '/');
-  if (!normalizedSource.startsWith(projectRoot + '/') && normalizedSource !== projectRoot) {
+  const normalizedSource = resolvedSource.replace(/\\/g, "/");
+  const projectRoot = dirname(resolve(targetPath)).replace(/\\/g, "/");
+  if (
+    !normalizedSource.startsWith(projectRoot + "/") &&
+    normalizedSource !== projectRoot
+  ) {
     throw new Error(`Source path escapes project root: ${sourcePath}`);
   }
 
-  const BINARY_TYPES = new Set(['pdf', 'word', 'richtext']);
+  const BINARY_TYPES = new Set(["pdf", "word", "richtext"]);
 
   // Only read text-based sources for keyword analysis
   if (!BINARY_TYPES.has(contentType)) {
     try {
-      sourceContent = await readFile(resolvedSource, 'utf-8');
+      sourceContent = await readFile(resolvedSource, "utf-8");
       wordCount = countWords(sourceContent);
     } catch (err: unknown) {
       if (!isNotFoundError(err) && !isPermissionError(err)) {
@@ -178,16 +262,21 @@ export async function ingestWithContext(
   }
 
   // Perform mechanical ingest
-  const ingestResult = await ingestSource(sourcePath, targetPath, dryRun, force);
+  const ingestResult = await ingestSource(
+    sourcePath,
+    targetPath,
+    dryRun,
+    force,
+  );
 
   // Find related pages if ingest succeeded and we have content
   let relatedPages: PageInfo[] = [];
-  if (ingestResult.status !== 'error' && sourceContent.length > 0) {
+  if (ingestResult.status !== "error" && sourceContent.length > 0) {
     try {
       const keywords = extractKeywords(sourceContent);
       if (keywords.length > 0) {
         // Use first 20 keywords as query string for manageable query
-        const queryStr = keywords.slice(0, 20).join(' ');
+        const queryStr = keywords.slice(0, 20).join(" ");
         const queryResult = await queryWiki(queryStr, targetPath, false);
         relatedPages = queryResult.results.map((r: QueryResult) => ({
           path: r.path,

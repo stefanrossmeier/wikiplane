@@ -1,11 +1,11 @@
-import { join } from 'node:path';
-import { access, constants } from 'node:fs/promises';
-import { listSources } from './sources.js';
-import { ingestSource, type IngestResult } from './ingest.js';
-import { slugify } from './utils.js';
-import { directoryExists } from './wiki.js';
-import { API_VERSION } from './constants.js';
-import { isNotFoundError } from './errors.js';
+import { join } from "node:path";
+import { access, constants } from "node:fs/promises";
+import { listSources } from "./sources.js";
+import { ingestSource, type IngestResult } from "./ingest.js";
+import { slugify } from "./utils.js";
+import { directoryExists } from "./wiki.js";
+import { API_VERSION } from "./constants.js";
+import { isNotFoundError } from "./errors.js";
 
 export interface BulkIngestOptions {
   dryRun?: boolean;
@@ -15,7 +15,7 @@ export interface BulkIngestOptions {
 
 export interface BulkIngestFileResult {
   file: string;
-  status: 'ingested' | 'skipped' | 'failed';
+  status: "ingested" | "skipped" | "failed";
   error?: string;
 }
 
@@ -37,10 +37,10 @@ export async function bulkIngest(
 ): Promise<BulkIngestResult> {
   const { dryRun = false, force = false, onProgress } = options;
 
-  const wikiPath = join(wikiDir, 'wiki');
+  const wikiPath = join(wikiDir, "wiki");
   if (!(await directoryExists(wikiPath))) {
     return {
-      command: 'bulk-ingest',
+      command: "bulk-ingest",
       api_version: API_VERSION,
       total: 0,
       ingested: 0,
@@ -53,7 +53,7 @@ export async function bulkIngest(
 
   const sources = await listSources(rawDir);
   const result: BulkIngestResult = {
-    command: 'bulk-ingest',
+    command: "bulk-ingest",
     api_version: API_VERSION,
     total: sources.length,
     ingested: 0,
@@ -72,7 +72,7 @@ export async function bulkIngest(
     // Check if already ingested (slug-summary.md exists) unless force
     if (!force) {
       const slug = slugify(source.name);
-      const summaryPath = join(wikiPath, 'sources', `${slug}-summary.md`);
+      const summaryPath = join(wikiPath, "sources", `${slug}-summary.md`);
       let exists = false;
       try {
         await access(summaryPath, constants.F_OK);
@@ -83,23 +83,32 @@ export async function bulkIngest(
       }
       if (exists) {
         result.skipped++;
-        result.files.push({ file: source.path, status: 'skipped' });
+        result.files.push({ file: source.path, status: "skipped" });
         continue;
       }
     }
 
     // Ingest the source
-    const ingestResult: IngestResult = await ingestSource(sourcePath, wikiDir, dryRun, force);
+    const ingestResult: IngestResult = await ingestSource(
+      sourcePath,
+      wikiDir,
+      dryRun,
+      force,
+    );
 
-    if (ingestResult.status === 'success') {
+    if (ingestResult.status === "success") {
       result.ingested++;
-      result.files.push({ file: source.path, status: 'ingested' });
-    } else if (ingestResult.status === 'skipped') {
+      result.files.push({ file: source.path, status: "ingested" });
+    } else if (ingestResult.status === "skipped") {
       result.skipped++;
-      result.files.push({ file: source.path, status: 'skipped' });
+      result.files.push({ file: source.path, status: "skipped" });
     } else {
       result.failed++;
-      result.files.push({ file: source.path, status: 'failed', error: ingestResult.error });
+      result.files.push({
+        file: source.path,
+        status: "failed",
+        error: ingestResult.error,
+      });
     }
   }
 

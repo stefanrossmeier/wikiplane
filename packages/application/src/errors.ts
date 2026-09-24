@@ -1,14 +1,14 @@
 export type FailureStage =
-  | 'ACQUIRE_FAILED'
-  | 'CONVERT_FAILED'
-  | 'OCR_FAILED'
-  | 'MODEL_FAILED'
-  | 'INTEGRATION_FAILED'
-  | 'CROSSLINK_FAILED'
-  | 'REBUILD_FAILED'
-  | 'LINT_FAILED'
-  | 'GIT_FAILED'
-  | 'PUSH_FAILED';
+  | "ACQUIRE_FAILED"
+  | "CONVERT_FAILED"
+  | "OCR_FAILED"
+  | "MODEL_FAILED"
+  | "INTEGRATION_FAILED"
+  | "CROSSLINK_FAILED"
+  | "REBUILD_FAILED"
+  | "LINT_FAILED"
+  | "GIT_FAILED"
+  | "PUSH_FAILED";
 
 export class WikiplaneOperationError extends Error {
   constructor(
@@ -17,11 +17,14 @@ export class WikiplaneOperationError extends Error {
     options?: ErrorOptions,
   ) {
     super(message, options);
-    this.name = 'WikiplaneOperationError';
+    this.name = "WikiplaneOperationError";
   }
 }
 
-export async function atStage<T>(stage: FailureStage, fn: () => Promise<T>): Promise<T> {
+export async function atStage<T>(
+  stage: FailureStage,
+  fn: () => Promise<T>,
+): Promise<T> {
   try {
     return await fn();
   } catch (error) {

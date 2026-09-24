@@ -56,7 +56,7 @@ To run both:
 tests/scripts/test-all
 ```
 
-Live model/OCR/web quality evaluation is intentionally not part of normal pull-request CI. Use the `evals/` tooling when a change affects model behavior, semantic quality, OCR, or web extraction.
+Live model and web-conversion quality evaluation is intentionally not part of normal pull-request CI. Use the `evals/` tooling when a change affects model behavior, semantic quality, or web extraction.
 
 ## Code organization
 
@@ -68,7 +68,7 @@ Keep responsibilities in their intended layer:
 - `packages/cli`: CLI surface only;
 - `packages/mcp`: high-level MCP surface only;
 - `services/model-gateway`: OpenAI-compatible logical model boundary;
-- `services/markitdown`: document conversion/OCR worker;
+- `services/markitdown`: isolated document conversion worker;
 - `config/prompts`: versioned compiler prompts;
 - `config/schema`: brain schema template;
 - `docs/adr`: durable architecture decisions.

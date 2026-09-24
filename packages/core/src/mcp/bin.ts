@@ -12,14 +12,14 @@
  * Intended to be invoked by MCP-compatible hosts (Claude Desktop, Cursor,
  * VS Code Copilot MCP, etc.) over stdio.
  */
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { resolve } from 'node:path';
-import { stat } from 'node:fs/promises';
-import { createMcpServer } from './server.js';
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { resolve } from "node:path";
+import { stat } from "node:fs/promises";
+import { createMcpServer } from "./server.js";
 
 async function main(): Promise<void> {
   const arg = process.argv[2];
-  const wikiRoot = resolve(arg && arg.length > 0 ? arg : '.');
+  const wikiRoot = resolve(arg && arg.length > 0 ? arg : ".");
 
   try {
     const info = await stat(wikiRoot);

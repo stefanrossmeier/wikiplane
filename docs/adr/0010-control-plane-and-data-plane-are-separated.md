@@ -5,7 +5,7 @@
 
 ## Context
 
-A supervising agent needs to request operations and report outcomes, but it does not need to consume every PDF, OCR page, converted document, or wiki page merely to orchestrate ingestion.
+A supervising agent needs to request operations and report outcomes, but it does not need to consume every PDF, converted document, or wiki page merely to orchestrate ingestion.
 
 Moving large documents through MCP or conversational tool results increases token cost and unnecessarily expands the information boundary.
 

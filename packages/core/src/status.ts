@@ -1,9 +1,9 @@
-import { join, resolve, relative } from 'node:path';
-import { listPages } from './wiki.js';
-import { readIndex } from './index-ops.js';
-import { readLog } from './log.js';
-import { API_VERSION } from './constants.js';
-import { listSources } from './sources.js';
+import { join, resolve, relative } from "node:path";
+import { listPages } from "./wiki.js";
+import { readIndex } from "./index-ops.js";
+import { readLog } from "./log.js";
+import { API_VERSION } from "./constants.js";
+import { listSources } from "./sources.js";
 
 /**
  * Result of running the status command.
@@ -25,10 +25,10 @@ export interface StatusResult {
  */
 export async function getWikiStatus(targetPath: string): Promise<StatusResult> {
   const root = resolve(targetPath);
-  const rawDir = join(root, 'raw');
-  const wikiDir = join(root, 'wiki');
-  const indexPath = join(wikiDir, 'index.md');
-  const logPath = join(wikiDir, 'log.md');
+  const rawDir = join(root, "raw");
+  const wikiDir = join(root, "wiki");
+  const indexPath = join(wikiDir, "index.md");
+  const logPath = join(wikiDir, "log.md");
 
   // Source count follows the core raw-source contract: every file under raw/
   // represents one source artifact. Wikiplane's canonical ingestion path stores
@@ -38,19 +38,21 @@ export async function getWikiStatus(targetPath: string): Promise<StatusResult> {
   // Wiki page count (*.md in wiki/, excluding index & log)
   const allPages = await listPages(wikiDir);
   const wikiPages = allPages.filter((p) => {
-    const rel = relative(wikiDir, p).replace(/\\/g, '/');
-    return rel !== 'index.md' && rel !== 'log.md';
+    const rel = relative(wikiDir, p).replace(/\\/g, "/");
+    return rel !== "index.md" && rel !== "log.md";
   });
   const wikiPageCount = wikiPages.length;
 
   // Last ingest / lint dates from log.md
   const logEntries = await readLog(logPath);
 
-  const ingestEntries = logEntries.filter((e) =>
-    e.verb.toLowerCase().includes('ingest') || e.verb.toLowerCase().includes('refresh'),
+  const ingestEntries = logEntries.filter(
+    (e) =>
+      e.verb.toLowerCase().includes("ingest") ||
+      e.verb.toLowerCase().includes("refresh"),
   );
   const lintEntries = logEntries.filter((e) =>
-    e.verb.toLowerCase().includes('lint'),
+    e.verb.toLowerCase().includes("lint"),
   );
 
   const lastIngestDate =
@@ -58,16 +60,14 @@ export async function getWikiStatus(targetPath: string): Promise<StatusResult> {
       ? ingestEntries[ingestEntries.length - 1].date
       : null;
   const lastLintDate =
-    lintEntries.length > 0
-      ? lintEntries[lintEntries.length - 1].date
-      : null;
+    lintEntries.length > 0 ? lintEntries[lintEntries.length - 1].date : null;
 
   // Orphan pages (not referenced in index.md)
   const indexEntries = await readIndex(indexPath);
   const indexedPaths = new Set(indexEntries.map((e) => e.path));
 
   const orphanPageCount = wikiPages.filter((p) => {
-    const rel = relative(wikiDir, p).replace(/\\/g, '/');
+    const rel = relative(wikiDir, p).replace(/\\/g, "/");
     return !indexedPaths.has(rel);
   }).length;
 
@@ -79,7 +79,7 @@ export async function getWikiStatus(targetPath: string): Promise<StatusResult> {
       : 100;
 
   return {
-    command: 'status',
+    command: "status",
     api_version: API_VERSION,
     source_count: sourceCount,
     wiki_page_count: wikiPageCount,

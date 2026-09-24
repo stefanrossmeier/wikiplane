@@ -1,12 +1,12 @@
-import { join, resolve } from 'node:path';
-import { mkdir } from 'node:fs/promises';
-import { readPage, writePage, directoryExists } from './wiki.js';
-import { readIndex, type IndexEntry } from './index-ops.js';
-import { appendEntry } from './log.js';
-import { countOccurrences } from './search.js';
-import { excerpt } from './utils.js';
-import { API_VERSION } from './constants.js';
-import { isNotFoundError } from './errors.js';
+import { join, resolve } from "node:path";
+import { mkdir } from "node:fs/promises";
+import { readPage, writePage, directoryExists } from "./wiki.js";
+import { readIndex, type IndexEntry } from "./index-ops.js";
+import { appendEntry } from "./log.js";
+import { countOccurrences } from "./search.js";
+import { excerpt } from "./utils.js";
+import { API_VERSION } from "./constants.js";
+import { isNotFoundError } from "./errors.js";
 
 export interface QueryResult {
   title: string;
@@ -30,8 +30,8 @@ export interface QueryOutput {
 export function slugifyQuery(query: string): string {
   return query
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
     .slice(0, 50);
 }
 
@@ -44,12 +44,12 @@ export async function queryWiki(
   save = false,
 ): Promise<QueryOutput> {
   const root = resolve(targetPath);
-  const wikiDir = join(root, 'wiki');
-  const indexPath = join(wikiDir, 'index.md');
+  const wikiDir = join(root, "wiki");
+  const indexPath = join(wikiDir, "index.md");
 
   if (!(await directoryExists(wikiDir))) {
     return {
-      command: 'query',
+      command: "query",
       api_version: API_VERSION,
       query: queryStr,
       matches: 0,
@@ -62,7 +62,7 @@ export async function queryWiki(
 
   if (terms.length === 0) {
     return {
-      command: 'query',
+      command: "query",
       api_version: API_VERSION,
       query: queryStr,
       matches: 0,
@@ -87,7 +87,7 @@ export async function queryWiki(
   const results: QueryResult[] = [];
   for (const { entry, indexScore } of scored) {
     let bodyScore = 0;
-    let body = '';
+    let body = "";
     try {
       const pagePath = join(wikiDir, entry.path);
       const page = await readPage(pagePath);
@@ -112,7 +112,7 @@ export async function queryWiki(
   results.sort((a, b) => b.score - a.score);
 
   const output: QueryOutput = {
-    command: 'query',
+    command: "query",
     api_version: API_VERSION,
     query: queryStr,
     matches: results.length,
@@ -126,7 +126,7 @@ export async function queryWiki(
     const queryFullPath = join(wikiDir, queryRelPath);
     const today = new Date().toISOString().slice(0, 10);
 
-    await mkdir(join(wikiDir, 'queries'), { recursive: true });
+    await mkdir(join(wikiDir, "queries"), { recursive: true });
 
     let body = `# Query: ${queryStr}\n\n`;
     body += `Found ${results.length} result(s).\n\n`;
@@ -139,7 +139,7 @@ export async function queryWiki(
 
     await writePage(queryFullPath, {
       frontmatter: {
-        type: 'query',
+        type: "query",
         title: `Query: ${queryStr}`,
         created: today,
         query: queryStr,
@@ -147,9 +147,9 @@ export async function queryWiki(
       body: body.trim(),
     });
 
-    const logPath = join(wikiDir, 'log.md');
+    const logPath = join(wikiDir, "log.md");
     await appendEntry(logPath, {
-      verb: 'queried',
+      verb: "queried",
       subject: queryStr,
       details: `Saved query "${queryStr}" → ${queryRelPath} (${results.length} results)`,
     });

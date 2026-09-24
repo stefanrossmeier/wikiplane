@@ -1,6 +1,6 @@
-import { appendFile, readFile, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import { isNotFoundError } from './errors.js';
+import { appendFile, readFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+import { isNotFoundError } from "./errors.js";
 
 export interface LogEntry {
   date: string;
@@ -16,13 +16,13 @@ export interface LogEntry {
  */
 export async function appendEntry(
   logPath: string,
-  entry: Omit<LogEntry, 'date'> & { date?: string },
+  entry: Omit<LogEntry, "date"> & { date?: string },
 ): Promise<void> {
   const date = entry.date ?? new Date().toISOString().slice(0, 10);
   const formatted = `## [${date}] ${entry.verb} | ${entry.subject}\n\n${entry.details}\n\n`;
 
   await mkdir(dirname(logPath), { recursive: true });
-  await appendFile(logPath, formatted, 'utf-8');
+  await appendFile(logPath, formatted, "utf-8");
 }
 
 /**
@@ -32,7 +32,7 @@ export async function appendEntry(
 export async function readLog(logPath: string): Promise<LogEntry[]> {
   let content: string;
   try {
-    content = await readFile(logPath, 'utf-8');
+    content = await readFile(logPath, "utf-8");
   } catch (err) {
     if (isNotFoundError(err)) return [];
     throw err;
@@ -44,7 +44,7 @@ export async function readLog(logPath: string): Promise<LogEntry[]> {
 
   const entries: LogEntry[] = [];
   const headerRegex = /^## \[(\d{4}-\d{2}-\d{2})\] (\S+) \| (.+)$/;
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
 
   let currentEntry: { date: string; verb: string; subject: string } | null =
     null;
@@ -57,7 +57,7 @@ export async function readLog(logPath: string): Promise<LogEntry[]> {
       if (currentEntry) {
         entries.push({
           ...currentEntry,
-          details: detailLines.join('\n').trim(),
+          details: detailLines.join("\n").trim(),
         });
       }
       currentEntry = {
@@ -75,7 +75,7 @@ export async function readLog(logPath: string): Promise<LogEntry[]> {
   if (currentEntry) {
     entries.push({
       ...currentEntry,
-      details: detailLines.join('\n').trim(),
+      details: detailLines.join("\n").trim(),
     });
   }
 

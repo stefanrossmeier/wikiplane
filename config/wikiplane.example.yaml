@@ -11,15 +11,13 @@ git:
 adapters:
   document: markitdown
   web: markitdown
-  ocr: markitdown-ocr
 
 models:
-  endpoint: http://model-gateway:8000/v1
+  endpoint: http://127.0.0.1:8000/v1
   roles:
     integrate: wikiplane-integrate
     crosslink: wikiplane-crosslink
     query: wikiplane-query
-    ocr: wikiplane-ocr
     judge: wikiplane-judge
 
 ingest:

@@ -26,7 +26,7 @@ wikiplane/                 system repository
   packages/mcp/            high-level MCP surface
   packages/testing/        fakes and reusable adapter contracts
   services/model-gateway/  OpenAI-compatible model boundary
-  services/markitdown/     file/path based document conversion + OCR
+  services/markitdown/     file/path based document conversion
 
 wikiplane-data/            storage-only brain
   AGENTS.md

@@ -1,0 +1,4 @@
+# No concrete production model is selected by architecture. The fake gateway mode works
+# without aliases. For real mode, set MODEL_ALIAS_WIKIPLANE_* environment variables or
+# copy this file and fill aliases based on the model-evaluation results.
+aliases: {}

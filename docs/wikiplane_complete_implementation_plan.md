@@ -1,6 +1,6 @@
 # Wikiplane — Complete Implementation Plan
 
-**Status:** implementation-ready  
+**Status:** implementation in progress — core product implementation present; live/evidence gates remain
 **Working project name:** Wikiplane  
 **Primary implementation language:** TypeScript  
 **Primary storage:** separate private Git repository containing Markdown  
@@ -9,6 +9,43 @@
 **Orchestration boundary:** Wikiplane owns knowledge operations; Safeplane later owns when/how Wikiplane is invoked
 
 ---
+
+## Implementation status — 2026-09-24
+
+Checkboxes below record **implemented repository work**, while acceptance gates that require unavailable live providers, model-quality evidence, Docker execution, or external GitHub state remain unchecked.
+
+- [x] Phase 0 — repository/tooling/governance files and CI definition implemented. Repository privacy is external GitHub state.
+- [ ] Phase 1 — LLM Wiki core imported/adapted and regression tests retained; full Node suite still needs execution after dependency installation.
+- [x] Phase 2 — adapter ports, fakes, and reusable contract suites implemented.
+- [x] Phase 3 — validated Wikiplane configuration and secret boundaries implemented.
+- [x] Phase 4 — root-level storage-only brain lifecycle and `brain init` implemented.
+- [x] Phase 5 — Git worktree transaction engine with rollback/isolation semantics implemented.
+- [x] Phase 6 — stable source IDs, exact supplied-reference lookup, provenance, and no-hash semantics implemented.
+- [x] Phase 7 — end-to-end Markdown ingestion path implemented with convergence tests.
+- [x] Phase 8 — copied model gateway adapted behind `ModelProvider`; text/JSON/multimodal passthrough unit-verified.
+- [ ] Phase 9 — model evaluation harness exists, but real model assignments require live comparative evidence.
+- [ ] Phase 10 — MarkItDown/OCR worker and gateway wiring implemented/unit-verified; normal + scanned synthetic PDF fixtures are present; live OCR/model quality acceptance still pending.
+- [x] Phase 11 — controlled acquisition with scheme, SSRF, redirects, timeout, streaming size, media-type, and filename protections implemented.
+- [x] Phase 12 — structured semantic compiler with bounded candidate context and deterministic filesystem authority implemented.
+- [x] Phase 13 — source-scoped contradiction preservation and removal reevaluation implemented with deterministic test coverage.
+- [x] Phase 14 — precision-oriented model cross-link pass with target validation implemented.
+- [x] Phase 15 — deterministic rebuild, stale-state check, backlinks calculation, schema/provenance lint implemented.
+- [ ] Phase 16 — deterministic unchanged-source convergence is covered; full OCR/converter drift thresholds still require golden/live evaluation.
+- [ ] Phase 17 — MarkItDown HTML baseline is implemented; comparative web-adapter benchmark/default selection is intentionally pending evidence.
+- [x] Phase 18 — gold-wiki-first lexical retrieval/query with bounded model context and source references implemented.
+- [x] Phase 19 — source removal preserves independently supported knowledge, repairs links, and removes invalidated contradictions.
+- [x] Phase 20 — human operation log plus out-of-brain JSONL operation telemetry implemented without body/prompt logging.
+- [x] Phase 21 — stable CLI over the application service implemented.
+- [x] Phase 22 — high-level MCP server implemented; source bodies are not returned as transport payloads.
+- [ ] Phase 23 — Docker-first three-service stack is defined with health checks/network/volume boundaries; full Compose E2E execution pending.
+- [ ] Phase 24 — deterministic/unit/contract/service tests and eval scaffolding implemented; full Node/Docker/live golden suite execution pending.
+- [x] Phase 25 — PR CI plus separate manually triggered model-eval workflow defined.
+- [ ] Phase 26 — `wikiplane-data` is initialized as a storage-only brain; GitHub privacy/push and first controlled real ingest require user-side execution.
+- [ ] Phase 27 — PDF vertical-slice code path exists, but live PDF deep-link E2E acceptance remains pending.
+- [ ] Phase 28 — corpus structure and initial convergence golden case exist; full 20-case semantic corpus remains pending.
+- [x] Phase 29 — safe transaction-scoped full recompile from durable raw Markdown implemented.
+- [ ] Phase 30 — Safeplane integration intentionally deferred until Wikiplane acceptance gates pass.
+- [ ] Phase 31 — public-release review intentionally pending live evals, exact Safeplane import SHA recovery, and release evidence.
 
 ## 1. Objective
 
@@ -2418,59 +2455,60 @@ Wikiplane is functionally complete for the intended second-brain use case when a
 
 A practical first sequence for execution:
 
-1. Create private `wikiplane` repo.
-2. Add TypeScript workspace, MIT, CI, architecture docs.
-3. Clone Microsoft LLM Wiki at a pinned SHA.
-4. Copy `packages/core` into Wikiplane.
-5. Add LLM Wiki license and import provenance.
-6. Make copied core tests green.
-7. Remove/abstract VS Code-specific assumptions from copied core.
-8. Define Wikiplane adapter ports.
-9. Define Wikiplane config schema.
-10. Implement local Git repository provider.
-11. Implement worktree transaction engine.
-12. Implement `brain init`.
-13. Create synthetic fixture brain.
-14. Implement Markdown adapter.
-15. Build first Markdown -> wiki -> lint -> commit integration test.
-16. Copy Safeplane model-gateway container.
-17. Verify OpenAI-compatible text calls.
-18. Verify structured-output calls.
-19. Verify multimodal pass-through.
-20. Add TypeScript `ModelProvider` adapter.
-21. Add versioned integration prompt v1.
-22. Convert freeform model output to structured mutations.
-23. Add contradiction golden test.
-24. Create MarkItDown worker container.
-25. Add MarkItDown OCR plugin.
-26. Wire OCR to model gateway.
-27. Implement controlled URL/PDF acquisition.
-28. Implement `DocumentConverter` adapter.
-29. Add normal PDF golden fixture.
-30. Add scanned PDF golden fixture.
-31. Implement PDF URL end-to-end ingest.
-32. Implement cross-reference pass.
-33. Implement deterministic rebuild.
-34. Implement `rebuild --check`.
-35. Extend lint/hygiene tests.
-36. Add repeated-ingest stability corpus.
-37. Compare model classes.
-38. Run web-adapter benchmark.
-39. Implement selected default web adapter.
-40. Add webpage end-to-end golden tests.
-41. Implement query.
-42. Implement source removal.
-43. Implement safe full recompile.
-44. Implement stable CLI.
-45. Implement high-level MCP server.
-46. Run full Docker E2E.
-47. Create real private brain repository.
-48. Run controlled real-source ingestion.
-49. Harden documentation/security/observability.
-50. Integrate Wikiplane into Safeplane with high-level workflows.
-51. Prove the end-user "send a link" workflow.
-52. Perform public-release readiness review.
+- [x] 1. Create private `wikiplane` repo.
+- [x] 2. Add TypeScript workspace, MIT, CI, architecture docs.
+- [x] 3. Clone Microsoft LLM Wiki at a pinned SHA.
+- [x] 4. Copy `packages/core` into Wikiplane.
+- [x] 5. Add LLM Wiki license and import provenance.
+- [ ] 6. Make copied core tests green.
+- [x] 7. Remove/abstract VS Code-specific assumptions from copied core.
+- [x] 8. Define Wikiplane adapter ports.
+- [x] 9. Define Wikiplane config schema.
+- [x] 10. Implement local Git repository provider.
+- [x] 11. Implement worktree transaction engine.
+- [x] 12. Implement `brain init`.
+- [x] 13. Create synthetic fixture brain.
+- [x] 14. Implement Markdown adapter.
+- [x] 15. Build first Markdown -> wiki -> lint -> commit integration test.
+- [x] 16. Copy Safeplane model-gateway container.
+- [x] 17. Verify OpenAI-compatible text calls.
+- [x] 18. Verify structured-output calls.
+- [x] 19. Verify multimodal pass-through.
+- [x] 20. Add TypeScript `ModelProvider` adapter.
+- [x] 21. Add versioned integration prompt v1.
+- [x] 22. Convert freeform model output to structured mutations.
+- [x] 23. Add contradiction golden test.
+- [x] 24. Create MarkItDown worker container.
+- [x] 25. Add MarkItDown OCR plugin.
+- [x] 26. Wire OCR to model gateway.
+- [x] 27. Implement controlled URL/PDF acquisition.
+- [x] 28. Implement `DocumentConverter` adapter.
+- [x] 29. Add normal PDF golden fixture.
+- [x] 30. Add scanned PDF golden fixture.
+- [x] 31. Implement PDF URL end-to-end ingest.
+- [x] 32. Implement cross-reference pass.
+- [x] 33. Implement deterministic rebuild.
+- [x] 34. Implement `rebuild --check`.
+- [x] 35. Extend lint/hygiene tests.
+- [x] 36. Add repeated-ingest stability corpus.
+- [ ] 37. Compare model classes.
+- [ ] 38. Run web-adapter benchmark.
+- [ ] 39. Implement selected default web adapter.
+- [ ] 40. Add webpage end-to-end golden tests.
+- [x] 41. Implement query.
+- [x] 42. Implement source removal.
+- [x] 43. Implement safe full recompile.
+- [x] 44. Implement stable CLI.
+- [x] 45. Implement high-level MCP server.
+- [ ] 46. Run full Docker E2E.
+- [x] 47. Create real private brain repository.
+- [ ] 48. Run controlled real-source ingestion.
+- [x] 49. Harden documentation/security/observability.
+- [ ] 50. Integrate Wikiplane into Safeplane with high-level workflows.
+- [ ] 51. Prove the end-user "send a link" workflow.
+- [ ] 52. Perform public-release readiness review.
 
+Notes: ticket 6 remains unchecked until the copied Node regression suite is executed with installed workspace dependencies. Tickets 17–19 are unit-verified against the OpenAI-compatible gateway boundary; provider-live behavior belongs to ticket 37/model evaluation. Ticket 31 denotes the implemented URL→acquire→convert→ingest code path, while Phase 27 remains open until a live PDF fixture passes. Ticket 47 records the prepared `wikiplane-data` repository layout; its private GitHub state cannot be verified from a ZIP snapshot.
 ---
 
 ## 40. Explicit non-goals for v1

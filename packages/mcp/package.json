@@ -1,0 +1,14 @@
+{
+  "name": "@wikiplane/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": { "wikiplane-mcp": "./dist/bin.js" },
+  "scripts": { "build": "tsc -b", "typecheck": "tsc --noEmit" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@wikiplane/application": "workspace:*",
+    "@wikiplane/cli": "workspace:*"
+  },
+  "devDependencies": { "@types/node": "^22.18.6", "typescript": "^5.9.2" }
+}

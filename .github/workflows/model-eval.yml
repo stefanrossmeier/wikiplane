@@ -1,0 +1,26 @@
+name: Model evaluation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      MODEL_GATEWAY_MODE: real
+      ALLOW_DIRECT_MODEL_IDS: '1'
+      WIKIPLANE_EVAL_MODELS: ${{ vars.WIKIPLANE_EVAL_MODELS }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: test -n "$OPENROUTER_API_KEY"
+      - run: test -n "$WIKIPLANE_EVAL_MODELS"
+      - run: docker compose -f docker-compose.yml -f docker-compose.eval.yml up -d --build model-gateway
+      - run: node evals/model-role-eval.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wikiplane-model-eval
+          path: evals/reports/*.json

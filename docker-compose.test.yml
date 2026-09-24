@@ -1,0 +1,7 @@
+services:
+  model-gateway:
+    environment:
+      MODEL_GATEWAY_MODE: fake
+  wikiplane:
+    environment:
+      MODEL_GATEWAY_MODE: fake

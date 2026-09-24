@@ -1,0 +1,35 @@
+brain:
+  remote: /brain-remote
+  branch: main
+  workspace_root: /workspace
+
+git:
+  author_name: Wikiplane
+  author_email: wikiplane@local
+  push: true
+
+adapters:
+  document: markitdown
+  web: markitdown
+  ocr: markitdown-ocr
+
+models:
+  endpoint: http://model-gateway:8000/v1
+  roles:
+    integrate: wikiplane-integrate
+    crosslink: wikiplane-crosslink
+    query: wikiplane-query
+    ocr: wikiplane-ocr
+    judge: wikiplane-judge
+
+ingest:
+  preserve_supplied_source_reference: true
+  retain_original_artifact: false
+  max_download_bytes: 52428800
+  timeout_ms: 30000
+  redirect_limit: 5
+
+logging:
+  level: info
+  retain_prompt_bodies: false
+  retain_document_bodies: false

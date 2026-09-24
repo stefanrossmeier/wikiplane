@@ -1,0 +1,52 @@
+{
+  "name": "@wikiplane/core",
+  "version": "0.1.2",
+  "description": "Adapted Microsoft LLM Wiki core operations for Wikiplane brain repositories",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stefanrossmeier/wikiplane.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/stefanrossmeier/wikiplane/issues"
+  },
+  "homepage": "https://github.com/stefanrossmeier/wikiplane#readme",
+  "keywords": [
+    "wiki",
+    "knowledge-base",
+    "mcp",
+    "llm",
+    "markdown"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "private": true
+}

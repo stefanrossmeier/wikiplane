@@ -1,0 +1,8 @@
+name: markdown-convergence
+expected:
+  source_identity: stable
+  duplicate_sources: 0
+  duplicate_concepts: 0
+  duplicate_entities: 0
+  unrelated_page_rewrites: 0
+  second_identical_ingest_model_calls: 0

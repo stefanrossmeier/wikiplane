@@ -1,0 +1,62 @@
+services:
+  wikiplane:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      WIKIPLANE_CONFIG: /app/config/docker.yaml
+      MARKITDOWN_ENDPOINT: http://markitdown:8010
+    volumes:
+      - wikiplane-workspace:/workspace
+      - ${WIKIPLANE_BRAIN_PATH:-../wikiplane-data}:/brain-remote
+    depends_on:
+      model-gateway:
+        condition: service_healthy
+      markitdown:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8020').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 4s
+      retries: 5
+    networks: [wikiplane-internal, acquisition-egress]
+
+  model-gateway:
+    build:
+      context: ./services/model-gateway
+    environment:
+      MODEL_GATEWAY_MODE: ${MODEL_GATEWAY_MODE:-fake}
+      MODEL_ALIASES_FILE: /app/config/models.yaml
+      ALLOW_DIRECT_MODEL_IDS: ${ALLOW_DIRECT_MODEL_IDS:-0}
+      MODEL_ALIAS_WIKIPLANE_INTEGRATE: ${MODEL_ALIAS_WIKIPLANE_INTEGRATE:-}
+      MODEL_ALIAS_WIKIPLANE_CROSSLINK: ${MODEL_ALIAS_WIKIPLANE_CROSSLINK:-}
+      MODEL_ALIAS_WIKIPLANE_QUERY: ${MODEL_ALIAS_WIKIPLANE_QUERY:-}
+      MODEL_ALIAS_WIKIPLANE_OCR: ${MODEL_ALIAS_WIKIPLANE_OCR:-}
+      MODEL_ALIAS_WIKIPLANE_JUDGE: ${MODEL_ALIAS_WIKIPLANE_JUDGE:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    volumes:
+      - ./config/models/models.example.yaml:/app/config/models.yaml:ro
+    networks: [wikiplane-internal, model-egress]
+
+  markitdown:
+    build:
+      context: ./services/markitdown
+    environment:
+      WORKSPACE_ROOT: /workspace
+      MODEL_GATEWAY_OPENAI_BASE_URL: http://model-gateway:8000/v1
+      OCR_MODEL_ALIAS: wikiplane-ocr
+    volumes:
+      - wikiplane-workspace:/workspace
+    depends_on:
+      model-gateway:
+        condition: service_healthy
+    networks: [wikiplane-internal]
+
+volumes:
+  wikiplane-workspace:
+
+networks:
+  wikiplane-internal:
+    internal: true
+  model-egress:
+  acquisition-egress:

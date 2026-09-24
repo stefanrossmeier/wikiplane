@@ -1,5 +1,15 @@
-# Wikiplane
+```text
+      ██╗    ██╗ ██╗ ██╗  ██╗ ██╗ ██████╗ ██╗      █████╗  ███╗   ██╗ ███████╗
+      ██║    ██║ ██║ ██║ ██╔╝ ██║ ██╔══██╗██║     ██╔══██╗ ████╗  ██║ ██╔════╝
+      ██║ █╗ ██║ ██║ █████╔╝  ██║ ██████╔╝██║     ███████║ ██╔██╗ ██║ █████╗
+      ██║███╗██║ ██║ ██╔═██╗  ██║ ██╔═══╝ ██║     ██╔══██║ ██║╚██╗██║ ██╔══╝
+      ╚███╔███╔╝ ██║ ██║  ██╗ ██║ ██║     ███████╗██║  ██║ ██║ ╚████║ ███████╗
+       ╚══╝╚══╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝ ╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═╝  ╚═══╝ ╚══════╝
 
+                      The local-first wiki for humans and agents
+
+            structured knowledge · versioned pages · agent-ready · human-owned
+```
 Wikiplane turns source material into a durable, cross-referenced Markdown knowledge base stored in Git.
 
 It is designed for two related uses:

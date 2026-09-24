@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+"$ROOT/scripts/bootstrap-node"
+"$ROOT/scripts/bootstrap-python"
+
+echo
+printf '%s\n' "Bootstrap complete." "Run: tests/scripts/test-unit"

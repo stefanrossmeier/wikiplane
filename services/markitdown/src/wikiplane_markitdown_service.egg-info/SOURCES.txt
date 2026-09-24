@@ -1,0 +1,9 @@
+pyproject.toml
+src/markitdown_service/__init__.py
+src/markitdown_service/main.py
+src/wikiplane_markitdown_service.egg-info/PKG-INFO
+src/wikiplane_markitdown_service.egg-info/SOURCES.txt
+src/wikiplane_markitdown_service.egg-info/dependency_links.txt
+src/wikiplane_markitdown_service.egg-info/requires.txt
+src/wikiplane_markitdown_service.egg-info/top_level.txt
+tests/test_markitdown_service.py

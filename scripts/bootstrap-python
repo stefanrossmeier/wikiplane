@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+PYTHON_BIN="${WIKIPLANE_PYTHON:-}"
+if [[ -z "$PYTHON_BIN" ]]; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+  elif command -v python >/dev/null 2>&1; then
+    PYTHON_BIN="python"
+  else
+    echo "error: Python >=3.11 is required." >&2
+    exit 1
+  fi
+fi
+
+if ! "$PYTHON_BIN" - <<'PY'
+import sys
+raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
+PY
+then
+  echo "error: Python >=3.11 is required; found $($PYTHON_BIN --version 2>&1)." >&2
+  exit 1
+fi
+
+VENV="${WIKIPLANE_VENV:-$ROOT/.venv}"
+if [[ ! -x "$VENV/bin/python" ]]; then
+  echo "==> Creating Python virtual environment at $VENV"
+  "$PYTHON_BIN" -m venv "$VENV"
+fi
+
+echo "==> Installing Python service + test dependencies"
+"$VENV/bin/python" -m pip install --upgrade pip
+"$VENV/bin/python" -m pip install -e "$ROOT/services/model-gateway[test]" -e "$ROOT/services/markitdown[test]"

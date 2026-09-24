@@ -63,3 +63,9 @@ Internet content, converted text, and model output are untrusted. Acquisition bl
 ## Query
 
 Query searches only compiled `wiki/` pages in v1, builds bounded lexical context, and asks the query model to answer from that context with wiki-path references. Raw source fallback is intentionally absent.
+
+## Decision records
+
+The durable rationale behind these invariants is recorded in [docs/adr/](docs/adr/README.md). The ADRs are the preferred place to document why an architectural constraint exists and how it may be superseded.
+
+The technical trust-boundary description is maintained in [docs/security-model.md](docs/security-model.md); vulnerability reporting instructions are intentionally kept separately in [SECURITY.md](SECURITY.md).

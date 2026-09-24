@@ -21,7 +21,7 @@
     "markdown"
   ],
   "engines": {
-    "node": ">=20"
+    "node": "^22.0.0 || ^24.0.0"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

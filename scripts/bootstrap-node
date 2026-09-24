@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "error: Node.js is required (see .nvmrc)." >&2
+  exit 1
+fi
+
+if ! command -v corepack >/dev/null 2>&1; then
+  echo "error: Corepack is required. Install a Node.js distribution that includes Corepack." >&2
+  exit 1
+fi
+
+actual_major="$(node -p 'process.versions.node.split(".")[0]')"
+case "$actual_major" in
+  22|24)
+    ;;
+  *)
+    echo "error: Node.js 22 or 24 LTS is required; found $(node --version)." >&2
+    echo "hint: Node 24 is the recommended version (see .nvmrc). Run 'nvm use' if needed." >&2
+    exit 1
+    ;;
+esac
+
+echo "==> Installing Node dependencies with the repository-pinned pnpm via Corepack"
+# Do not run `corepack enable`: on system-managed Node installations it tries to
+# create global symlinks (for example in /usr/local/bin) and can fail with EACCES.
+# `corepack pnpm` executes the packageManager version from package.json directly.
+corepack pnpm install --no-frozen-lockfile

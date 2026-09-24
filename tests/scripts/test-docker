@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "error: Docker is not installed." >&2
+  exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+  echo "error: Docker is installed but its daemon is not running." >&2
+  echo "hint: start Docker Desktop (macOS/Windows) or the Docker daemon, then retry." >&2
+  exit 1
+fi
+
+exec docker compose build

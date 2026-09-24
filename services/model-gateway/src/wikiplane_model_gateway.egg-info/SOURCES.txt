@@ -1,0 +1,9 @@
+pyproject.toml
+src/model_gateway/__init__.py
+src/model_gateway/main.py
+src/wikiplane_model_gateway.egg-info/PKG-INFO
+src/wikiplane_model_gateway.egg-info/SOURCES.txt
+src/wikiplane_model_gateway.egg-info/dependency_links.txt
+src/wikiplane_model_gateway.egg-info/requires.txt
+src/wikiplane_model_gateway.egg-info/top_level.txt
+tests/test_model_gateway.py

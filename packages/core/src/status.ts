@@ -1,10 +1,9 @@
-import { readdir } from 'node:fs/promises';
 import { join, resolve, relative } from 'node:path';
 import { listPages } from './wiki.js';
 import { readIndex } from './index-ops.js';
 import { readLog } from './log.js';
 import { API_VERSION } from './constants.js';
-import { isNotFoundError } from './errors.js';
+import { listSources } from './sources.js';
 
 /**
  * Result of running the status command.
@@ -31,15 +30,10 @@ export async function getWikiStatus(targetPath: string): Promise<StatusResult> {
   const indexPath = join(wikiDir, 'index.md');
   const logPath = join(wikiDir, 'log.md');
 
-  // Source count (files in raw/)
-  let sourceCount = 0;
-  try {
-    const rawEntries = await readdir(rawDir, { withFileTypes: true, recursive: true });
-    sourceCount = rawEntries.filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.md')).length;
-  } catch (err) {
-    if (!isNotFoundError(err)) throw err;
-    // ENOENT — raw/ doesn't exist; 0 sources
-  }
+  // Source count follows the core raw-source contract: every file under raw/
+  // represents one source artifact. Wikiplane's canonical ingestion path stores
+  // Markdown here, while this remains compatible with imported/legacy brains.
+  const sourceCount = (await listSources(rawDir)).length;
 
   // Wiki page count (*.md in wiki/, excluding index & log)
   const allPages = await listPages(wikiDir);

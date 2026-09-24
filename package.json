@@ -15,13 +15,16 @@
     "lint": "eslint . --max-warnings=0",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "ci": "prettier --check . && eslint . --max-warnings=0 && node scripts/check-policy.mjs && corepack pnpm -r build && corepack pnpm -r typecheck && vitest run",
+    "ci": "corepack pnpm run quality && corepack pnpm run test:node",
     "wikiplane": "tsx packages/cli/src/bin.ts",
     "mcp": "tsx packages/mcp/src/bin.ts",
-    "policy:check": "node scripts/check-policy.mjs"
+    "policy:check": "node scripts/check-policy.mjs",
+    "quality": "prettier --check . && eslint . --max-warnings=0 && node scripts/check-policy.mjs",
+    "test:node": "corepack pnpm -r build && corepack pnpm -r typecheck && vitest run"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@types/node": "^22.18.6",
     "eslint": "^9.36.0",
     "prettier": "^3.6.2",

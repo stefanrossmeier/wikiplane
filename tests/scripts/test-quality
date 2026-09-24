@@ -10,6 +10,4 @@ if [[ ! -d node_modules ]]; then
   exit 1
 fi
 
-# Unit tests must exercise the implementation, not repository formatting.
-# Formatting/lint/policy checks are exposed separately through test-quality.
-exec corepack pnpm run test:node
+exec corepack pnpm run quality

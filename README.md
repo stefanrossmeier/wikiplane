@@ -167,13 +167,19 @@ Run deterministic Node and Python tests:
 tests/scripts/test-unit
 ```
 
+Run repository formatting/lint/policy checks separately:
+
+```bash
+tests/scripts/test-quality
+```
+
 Run container build validation separately:
 
 ```bash
 tests/scripts/test-docker
 ```
 
-Docker validation requires a running Docker daemon. To run both:
+Docker validation requires a running Docker daemon. To run quality checks, unit tests, and the Docker build:
 
 ```bash
 tests/scripts/test-all

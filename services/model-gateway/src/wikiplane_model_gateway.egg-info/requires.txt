@@ -6,4 +6,4 @@ litellm>=1.74.0
 
 [test]
 pytest>=8.0
-httpx>=0.27
+httpx2<3,>=2.5

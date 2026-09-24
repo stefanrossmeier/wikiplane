@@ -39,9 +39,10 @@ Run deterministic validation:
 
 ```bash
 tests/scripts/test-unit
+tests/scripts/test-quality
 ```
 
-This runs the repository's Node CI package script plus both Python service test suites.
+The unit entrypoint runs Node build/typecheck/Vitest plus both Python service suites. The quality entrypoint runs Prettier, ESLint, and repository policy checks.
 
 If Docker is available and running, also run:
 
@@ -158,3 +159,7 @@ A useful pull request should explain:
 - related ADR changes for architectural decisions.
 
 Prefer small reviewable commits where possible. Large upstream imports should remain separable from adaptations so provenance stays auditable.
+
+### Test and quality gates
+
+`tests/scripts/test-unit` verifies behavior and compilation. `tests/scripts/test-quality` verifies formatting, lint, and repository policy. Run both before opening a pull request; `tests/scripts/test-all` additionally verifies the Docker build.

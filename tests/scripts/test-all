@@ -2,5 +2,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+"$ROOT/tests/scripts/test-quality"
 "$ROOT/tests/scripts/test-unit"
 "$ROOT/tests/scripts/test-docker"

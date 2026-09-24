@@ -86,7 +86,7 @@ class LocalWorkingGitOperation implements RepositoryOperation {
   ) {}
 
   async commit(message: string): Promise<string | null> {
-    await git(this.root, ['add', '-A', '--', 'README.md', 'AGENTS.md', 'raw', 'wiki']);
+    await stageManagedBrainState(this.root);
     const changed = (await git(this.root, ['status', '--porcelain'])).trim();
     if (!changed) return null;
     await git(this.root, ['commit', '-m', message]);
@@ -185,7 +185,7 @@ class GitOperation implements RepositoryOperation {
 
   async commit(message: string): Promise<string | null> {
     ensureInside(this.target.workspaceRoot, this.root);
-    await git(this.root, ['add', '-A', '--', 'README.md', 'AGENTS.md', 'raw', 'wiki']);
+    await stageManagedBrainState(this.root);
     const changed = (await git(this.root, ['status', '--porcelain'])).trim();
     if (!changed) return null;
     await git(this.root, ['commit', '-m', message]);
@@ -203,6 +203,24 @@ class GitOperation implements RepositoryOperation {
     this.closed = true;
     await this.closer();
   }
+}
+
+const MANAGED_BRAIN_PATHS = ['README.md', 'AGENTS.md', 'raw', 'wiki'] as const;
+
+async function stageManagedBrainState(root: string): Promise<void> {
+  const stageable: string[] = [];
+  for (const path of MANAGED_BRAIN_PATHS) {
+    if ((await exists(join(root, path))) || (await isTracked(root, path))) {
+      stageable.push(path);
+    }
+  }
+  if (stageable.length === 0) return;
+  await git(root, ['add', '-A', '--', ...stageable]);
+}
+
+async function isTracked(root: string, path: string): Promise<boolean> {
+  const output = await git(root, ['ls-files', '--', path]);
+  return Boolean(output.trim());
 }
 
 async function configureAuthor(root: string, target: RepositoryTarget): Promise<void> {

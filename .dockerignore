@@ -1,0 +1,25 @@
+# Version-control and local developer state must never enter image build context.
+.git
+.gitignore
+.github
+.env
+.env.*
+!.env.example
+.venv
+.var
+workspaces
+artifacts
+coverage
+node_modules
+**/node_modules
+**/dist
+**/*.egg-info
+**/__pycache__
+**/.pytest_cache
+*.log
+*.zip
+*.patch
+wikiplane.yaml
+*.local.yaml
+evals/reports
+.DS_Store

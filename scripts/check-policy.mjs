@@ -1,8 +1,11 @@
-import { access, readdir, readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { access, readFile } from "node:fs/promises";
 import { extname, join, relative } from "node:path";
+import { promisify } from "node:util";
 
 const root = process.cwd();
 const errors = [];
+const execFileAsync = promisify(execFile);
 
 for (const required of [
   ".dockerignore",
@@ -22,29 +25,34 @@ for (const required of [
   try {
     await access(join(root, required));
   } catch {
-    errors.push(`missing required license/provenance file: ${required}`);
+    errors.push(`missing required publication file: ${required}`);
   }
 }
 
-const ignoredDirectories = new Set([
-  ".git",
-  "node_modules",
-  ".var",
-  "dist",
-  "coverage",
-  ".pytest_cache",
-  "__pycache__",
-]);
-const files = [];
-async function walk(dir) {
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) await walk(path);
-    else files.push(path);
+async function listPublishableFiles() {
+  try {
+    const { stdout } = await execFileAsync(
+      "git",
+      ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+      {
+        cwd: root,
+        encoding: "utf8",
+        maxBuffer: 16 * 1024 * 1024,
+      },
+    );
+    return stdout
+      .split("\0")
+      .filter(Boolean)
+      .map((path) => join(root, path));
+  } catch (error) {
+    errors.push(
+      `unable to enumerate publishable files with git: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return [];
   }
 }
-await walk(root);
+
+const files = await listPublishableFiles();
 
 for (const path of files) {
   const rel = relative(root, path).replaceAll("\\", "/");
@@ -108,5 +116,5 @@ if (errors.length) {
   for (const error of errors) console.error(`policy: ${error}`);
   process.exitCode = 1;
 } else {
-  console.log(`policy: ok (${files.length} files checked)`);
+  console.log(`policy: ok (${files.length} publishable files checked)`);
 }

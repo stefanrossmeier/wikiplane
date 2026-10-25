@@ -36,7 +36,7 @@ jobs:
         shell: python
         run: |
           """Trusted-base GitHub PR governance. Never checks out or executes PR code."""
-          
+
           import base64
           import json
           import os
@@ -44,7 +44,7 @@ jobs:
           from pathlib import PurePosixPath
           from urllib.error import HTTPError
           from urllib.request import Request, urlopen
-          
+
           LABEL = "ai-generated"
           DIRECTORIES = {"repositories", "articles", "papers", "social-posts", "videos", "other"}
           REQUIRED_KEYS = {
@@ -57,8 +57,8 @@ jobs:
               "tags",
               "use_cases",
           }
-          
-          
+
+
           def valid_path(path):
               parts = PurePosixPath(path).parts
               return (
@@ -67,8 +67,8 @@ jobs:
                   and parts[1] in DIRECTORIES
                   and re.fullmatch(r"[a-z0-9][a-z0-9-]*\.md", parts[2]) is not None
               )
-          
-          
+
+
           def validate_files(files):
               if not files:
                   return False
@@ -76,8 +76,8 @@ jobs:
                   f.get("status") == "added" and not f.get("previous_filename") and valid_path(f["filename"])
                   for f in files
               )
-          
-          
+
+
           def validate_fragment(text):
               # Structural research-fragment check; no YAML constructors or code execution.
               if not text.startswith("---\n") or "\n---\n" not in text[4:]:
@@ -92,13 +92,13 @@ jobs:
                       for h in ("## What it is", "## Why it is interesting", "## Practical applications")
                   )
               )
-          
-          
+
+
           class GitHub:
               def __init__(self, repo, token):
                   self.repo = repo
                   self.token = token
-          
+
               def api(self, path, method="GET", data=None):
                   req = Request(
                       "https://api.github.com/repos/" + self.repo + path,
@@ -113,7 +113,7 @@ jobs:
                   with urlopen(req, timeout=30) as response:
                       content = response.read()
                       return json.loads(content) if content else None
-          
+
               def pages(self, path):
                   output = []
                   for page in range(1, 101):
@@ -122,7 +122,7 @@ jobs:
                       if len(rows) < 100:
                           return output
                   raise RuntimeError("Pagination limit exceeded; refusing partial results")
-          
+
               def status(self, sha, context, passed, description):
                   self.api(
                       "/statuses/" + sha,
@@ -134,16 +134,16 @@ jobs:
                           "target_url": os.environ.get("RUN_URL", "https://github.com/" + self.repo),
                       },
                   )
-          
-          
+
+
           def candidate(pr):
               return (
                   pr["head"]["ref"].startswith(("conrad/", "codex/"))
                   or "AI disclosure:" in (pr.get("body") or "")
                   or LABEL in {label["name"] for label in pr["labels"]}
               )
-          
-          
+
+
           def own_fragment_pr(repo, pr):
               return (
                   repo == "stefanrossmeier/interesting-items"
@@ -154,20 +154,20 @@ jobs:
                   and pr["base"]["ref"] == "main"
                   and not pr["draft"]
               )
-          
-          
+
+
           def inspect_fragments(gh, pr):
               files = gh.pages(f"/pulls/{pr['number']}/files")
               if len(files) != pr["changed_files"] or len(files) >= 3000 or not validate_files(files):
                   return False
               # Verify immutable trees as well as the PR diff, including regular file mode.
               trees = {}
-          
+
               def tree(sha):
                   if sha not in trees:
                       trees[sha] = {row["path"]: row for row in gh.api("/git/trees/" + sha)["tree"]}
                   return trees[sha]
-          
+
               def find(sha, path):
                   parts = path.split("/")
                   for index, part in enumerate(parts):
@@ -178,7 +178,7 @@ jobs:
                           return None
                       sha = entry["sha"]
                   return entry
-          
+
               for f in files:
                   path = f["filename"]
                   entry = find(pr["head"]["sha"], path)
@@ -196,8 +196,8 @@ jobs:
                   if not validate_fragment(text):
                       return False
               return True
-          
-          
+
+
           def checks_ready(gh, pr):
               sha = pr["head"]["sha"]
               # All latest commit statuses and latest check runs must succeed. Ignore only
@@ -222,8 +222,8 @@ jobs:
               # Existing required checks, including missing ones, are independently enforced
               # by GitHub's normal merge API. No admin bypass or protection changes occur.
               return True
-          
-          
+
+
           def process(gh, number, merge_enabled):
               pr = gh.api(f"/pulls/{number}")
               if pr["state"] != "open" or not candidate(pr):
@@ -280,8 +280,8 @@ jobs:
                       except HTTPError as error:
                           if error.code not in (404, 422):
                               raise
-          
-          
+
+
           def main():
               gh = GitHub(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"])
               with open(os.environ["GITHUB_EVENT_PATH"]) as event_file:
@@ -292,7 +292,7 @@ jobs:
               else:
                   for pr in gh.pages("/pulls?state=open"):
                       process(gh, pr["number"], enabled)
-          
-          
+
+
           if __name__ == "__main__":
               main()

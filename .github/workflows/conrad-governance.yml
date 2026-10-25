@@ -1,7 +1,16 @@
 name: Conrad GitHub governance
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize, edited, labeled, unlabeled, ready_for_review]
+    types:
+      [
+        opened,
+        reopened,
+        synchronize,
+        edited,
+        labeled,
+        unlabeled,
+        ready_for_review,
+      ]
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,7 +27,7 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      MERGE_ENABLED: 'false'
+      MERGE_ENABLED: "false"
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       # This code comes from the trusted default branch. No checkout, PR imports,

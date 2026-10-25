@@ -1,10 +1,10 @@
 name: Conrad governance tests
 on:
   pull_request:
-    paths: ['.github/conrad/**', '.github/workflows/conrad-*.yml']
+    paths: [".github/conrad/**", ".github/workflows/conrad-*.yml"]
   push:
     branches: [main]
-    paths: ['.github/conrad/**', '.github/workflows/conrad-*.yml']
+    paths: [".github/conrad/**", ".github/workflows/conrad-*.yml"]
 permissions:
   contents: read
 jobs:
